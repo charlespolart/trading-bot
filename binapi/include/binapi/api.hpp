@@ -129,9 +129,9 @@ struct api {
     // https://github.com/binance-exchange/binance-official-api-docs/blob/master/rest-api.md#klinecandlestick-data
     using klines_cb = std::function<bool(const char *fl, int ec, std::string errmsg, klines_t res)>;
     result<klines_t>
-    klines(const std::string &symbol, const std::string &interval, std::size_t limit, klines_cb cb = {}) { return klines(symbol.c_str(), interval.c_str(), limit, std::move(cb)); }
+    klines(const std::string &symbol, const std::string &interval, std::size_t limit, std::size_t startTime = 0, std::size_t endTime = 0, klines_cb cb = {}) { return klines(symbol.c_str(), interval.c_str(), limit, startTime, endTime, std::move(cb)); }
     result<klines_t>
-    klines(const char *symbol, const char *interval, std::size_t limit, klines_cb cb = {});
+    klines(const char *symbol, const char *interval, std::size_t limit, std::size_t startTime = 0, std::size_t endTime = 0, klines_cb cb = {});
 
     // https://github.com/binance-exchange/binance-official-api-docs/blob/master/rest-api.md#account-information-user_data
     using account_info_cb = std::function<bool(const char *fl, int ec, std::string errmsg, account_info_t res)>;

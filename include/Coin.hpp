@@ -4,6 +4,7 @@
 #include <binapi/websocket.hpp>
 
 #include "Params.h"
+#include "Database.hpp"
 #include "EMACross.hpp"
 #include "Tools.hpp"
 
@@ -15,7 +16,8 @@ public:
     ~Coin();
 
 public:
-    void init(binapi::rest::api *api, binapi::ws::websockets_pool *ws);
+    void updateCallback(const binapi::ws::kline_t &kline);
+    int init(binapi::rest::api *api, size_t endTime = 0);
 
 public:
     std::string _pair;

@@ -27,13 +27,18 @@ void EMACross::addNewCandle()
 
 /* PUBLIC */
 
-cross_e EMACross::update(const binapi::ws::kline_t &kline)
+result_t EMACross::update(const binapi::ws::kline_t &kline)
 {
+    result_t result;
+
     this->_cross = cross_e::NONE;
+    result.candle = this->_currentCandle;
     if (kline.t != this->_currentCandle.startTime)
         this->addNewCandle();
-    this->_currentCandle = candle_t{kline.t, kline.c};
-    return (this->_cross);
+    this->_currentCandle = candle_t{kline.t, kline.o, kline.c};
+    result.cross = this->_cross;
+    result.EMA = this->_EMA;
+    return (result);
 }
 
 int EMACross::init(const std::vector<binapi::rest::klines_t::kline_t> &klines)

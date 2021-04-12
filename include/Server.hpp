@@ -10,6 +10,7 @@
 
 #include "Params.h"
 #include "Coin.hpp"
+#include "Database.hpp"
 
 class Server
 {
@@ -18,6 +19,8 @@ public:
     ~Server();
 
 public:
+    int runEMAHistory();
+    int runEMA();
     int run();
 
 private:

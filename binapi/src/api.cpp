@@ -703,13 +703,43 @@ api::result<agg_trades_t> api::agg_trades(const char *symbol, std::size_t limit,
 
 /*************************************************************************************************/
 
-api::result<klines_t> api::klines(const char *symbol, const char *interval, std::size_t limit, klines_cb cb) {
+api::result<klines_t> api::klines(const char *symbol, const char *interval, std::size_t limit, std::size_t startTime, std::size_t endTime, klines_cb cb) {
+    if (startTime == 0 && endTime == 0)
+    {
+        const impl::init_list_type map = {
+            {"symbol", symbol}
+            ,{"limit", limit}
+            ,{"interval", interval}
+        };
+        return pimpl->post(false, "/api/v3/klines", boost::beast::http::verb::get, map, std::move(cb));
+    }
+    else if (startTime == 0)
+    {
+        const impl::init_list_type map = {
+            {"symbol", symbol}
+            ,{"endTime", endTime}
+            ,{"limit", limit}
+            ,{"interval", interval}
+        };
+        return pimpl->post(false, "/api/v3/klines", boost::beast::http::verb::get, map, std::move(cb));
+    }
+    else if (endTime == 0)
+    {
+        const impl::init_list_type map = {
+            {"symbol", symbol}
+            ,{"startTime", startTime}
+            ,{"limit", limit}
+            ,{"interval", interval}
+        };
+        return pimpl->post(false, "/api/v3/klines", boost::beast::http::verb::get, map, std::move(cb));
+    }
     const impl::init_list_type map = {
-         {"symbol", symbol}
+        {"symbol", symbol}
+        ,{"startTime", startTime}
+        ,{"endTime", endTime}
         ,{"limit", limit}
         ,{"interval", interval}
     };
-
     return pimpl->post(false, "/api/v3/klines", boost::beast::http::verb::get, map, std::move(cb));
 }
 

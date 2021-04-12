@@ -16,6 +16,7 @@ enum cross_e
 struct candle_t
 {
     size_t startTime = 0;
+    binapi::double_type openPrice = 0.0;
     binapi::double_type closePrice = 0.0;
 };
 
@@ -36,13 +37,20 @@ struct EMA_t
     binapi::double_type currentLong = 0.0;
 };
 
+struct result_t
+{
+    cross_e cross;
+    EMA_t EMA;
+    candle_t candle;
+};
+
 class EMACross
 {
 public:
     EMACross();
 
 public:
-    cross_e update(const binapi::ws::kline_t &kline);
+    result_t update(const binapi::ws::kline_t &kline);
     int init(const std::vector<binapi::rest::klines_t::kline_t> &klines);
 
 private:

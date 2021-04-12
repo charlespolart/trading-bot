@@ -8,6 +8,8 @@
 #include <sstream>
 #include <iomanip>
 
+#include <binapi/double_type.hpp>
+
 namespace Tools
 {
     class Date
@@ -43,6 +45,10 @@ namespace Tools
     class Convert
     {
     public:
+        static std::string to_string(binapi::double_type n, int precision)
+        {
+            return (to_string(static_cast<double>(n), precision));
+        }
         static std::string to_string(double n, int precision)
         {
             int trunc = std::pow(10, precision);

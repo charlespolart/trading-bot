@@ -11,37 +11,48 @@ Coin::~Coin()
 
 /* PUBLIC */
 
-void Coin::init(binapi::rest::api *api, binapi::ws::websockets_pool *ws)
+void Coin::updateCallback(const binapi::ws::kline_t &kline)
+{
+    result_t result = this->_EMACross.update(kline);
+
+    /* Buy */
+    if (result.cross == cross_e::CROSS_UP)
+    {
+        Database database(HISTORY ? std::getenv("DATABASE_RESULT_HISTORY_NAME") : std::getenv("DATABASE_RESULT_NAME"));
+        pqxx::work work(database.getConnection());
+        work.exec("INSERT INTO transaction VALUES ('" + kline.s + "', '" + kline.i + "', '" + std::to_string(kline.t) + "', '" + std::to_string(kline.T) + "', '" + Tools::Convert::to_string(kline.o, 8) + "', '" + Tools::Convert::to_string(kline.c, 8) + "', '" + Tools::Convert::to_string(kline.l, 8) + "', '" + Tools::Convert::to_string(kline.h, 8) + "', '" + Tools::Convert::to_string(kline.v, 8) + "', '" + Tools::Convert::to_string(kline.q, 8) + "', '" + Tools::Convert::to_string(kline.V, 8) + "', '" + Tools::Convert::to_string(kline.Q, 8) + "', '" + std::to_string(kline.n) + "', 'BUY', '" + Tools::Convert::to_string(result.EMA.currentShort, 8) + "')");
+        work.commit();
+        database.getConnection().close();
+        //std::cout << "INSERT INTO transaction VALUES ('" + kline.s + "', '" + kline.i + "', '" + std::to_string(kline.t) + "', '" + std::to_string(kline.T) + "', '" + Tools::Convert::to_string(kline.o, 8) + "', '" + Tools::Convert::to_string(kline.c, 8) + "', '" + Tools::Convert::to_string(kline.l, 8) + "', '" + Tools::Convert::to_string(kline.h, 8) + "', '" + Tools::Convert::to_string(kline.v, 8) + "', '" + Tools::Convert::to_string(kline.q, 8) + "', '" + Tools::Convert::to_string(kline.V, 8) + "', '" + Tools::Convert::to_string(kline.Q, 8) + "', '" + std::to_string(kline.n) + "', 'BUY', '" + Tools::Convert::to_string(result.EMA.currentShort, 8) + "')" << std::endl;
+    }
+
+    /* Sell */
+    if (result.cross == cross_e::CROSS_DOWN)
+    {
+        Database database(HISTORY ? std::getenv("DATABASE_RESULT_HISTORY_NAME") : std::getenv("DATABASE_RESULT_NAME"));
+        pqxx::work work(database.getConnection());
+        work.exec("INSERT INTO transaction VALUES ('" + kline.s + "', '" + kline.i + "', '" + std::to_string(kline.t) + "', '" + std::to_string(kline.T) + "', '" + Tools::Convert::to_string(kline.o, 8) + "', '" + Tools::Convert::to_string(kline.c, 8) + "', '" + Tools::Convert::to_string(kline.l, 8) + "', '" + Tools::Convert::to_string(kline.h, 8) + "', '" + Tools::Convert::to_string(kline.v, 8) + "', '" + Tools::Convert::to_string(kline.q, 8) + "', '" + Tools::Convert::to_string(kline.V, 8) + "', '" + Tools::Convert::to_string(kline.Q, 8) + "', '" + std::to_string(kline.n) + "', 'SELL', '" + Tools::Convert::to_string(result.EMA.currentShort, 8) + "')");
+        work.commit();
+        database.getConnection().close();
+        //std::cout << "INSERT INTO transaction VALUES ('" + kline.s + "', '" + kline.i + "', '" + std::to_string(kline.t) + "', '" + std::to_string(kline.T) + "', '" + Tools::Convert::to_string(kline.o, 8) + "', '" + Tools::Convert::to_string(kline.c, 8) + "', '" + Tools::Convert::to_string(kline.l, 8) + "', '" + Tools::Convert::to_string(kline.h, 8) + "', '" + Tools::Convert::to_string(kline.v, 8) + "', '" + Tools::Convert::to_string(kline.q, 8) + "', '" + Tools::Convert::to_string(kline.V, 8) + "', '" + Tools::Convert::to_string(kline.Q, 8) + "', '" + std::to_string(kline.n) + "', 'SELL', '" + Tools::Convert::to_string(result.EMA.currentShort, 8) + "')" << std::endl;
+    }
+}
+
+int Coin::init(binapi::rest::api *api, size_t endTime)
 {
     std::cout << "Starting " << this->_pair << std::endl;
 
-    auto klines = api->klines(this->_pair, INTERVAL, 1000);
+    auto klines = api->klines(this->_pair, INTERVAL, 1000, 0, endTime);
 
     if (!klines)
     {
         std::cerr << klines.errmsg << std::endl;
-        return;
+        return (EXIT_FAILURE);
     }
     if (this->_EMACross.init(klines.v.klines) == EXIT_FAILURE)
     {
         std::cerr << this->_pair << ": Init error" << std::endl;
-        return;
+        return (EXIT_FAILURE);
     }
-    ws->klines(this->_pair.c_str(), INTERVAL, [this](const char *fl, int ec, std::string errmsg, binapi::ws::kline_t kline) {
-        if (ec)
-        {
-            std::cerr << "subscribe klines error: fl=" << fl << ", ec=" << ec << ", errmsg=" << errmsg << std::endl;
-            return (false);
-        }
-        cross_e cross = this->_EMACross.update(kline);
-        if (cross == cross_e::CROSS_UP)
-        {
-            std::cout << this->_pair << " Cross up -> Close time: " << Tools::Date::getDate(kline.T) << std::endl;
-        }
-        if (cross == cross_e::CROSS_DOWN)
-        {
-            std::cout << this->_pair << " Cross down -> Close time: " << Tools::Date::getDate(kline.T) << std::endl;
-        }
-        return (true);
-    });
+    return (EXIT_SUCCESS);
 }
