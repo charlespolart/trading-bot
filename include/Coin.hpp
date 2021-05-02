@@ -5,7 +5,7 @@
 
 #include "Params.h"
 #include "Database.hpp"
-#include "EMACross.hpp"
+#include "Indicators.hpp"
 #include "Tools.hpp"
 
 class Coin
@@ -16,6 +16,9 @@ public:
     ~Coin();
 
 public:
+    binapi::rest::new_order_info_full_t getBuyOrderInfo() const;
+
+public:
     void updateCallback(const binapi::ws::kline_t &kline);
     int init(binapi::rest::api *api, size_t endTime = 0);
 
@@ -24,7 +27,9 @@ public:
     binapi::double_type _stepSize;
 
 private:
-    EMACross _EMACross;
+    Indicators _indicators;
+    binapi::rest::new_order_info_full_t _buyOrderInfo;
+    binapi::rest::new_order_info_full_t _sellOrderInfo;
 };
 
 #endif // COIN_HPP

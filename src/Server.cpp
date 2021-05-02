@@ -39,8 +39,8 @@ int Server::fetchCoins()
         {
             std::string pair = it->first;
             binapi::double_type stepSize = it->second.get_filter_lot().stepSize;
-            //if (it->first == "ETHBTC")
-            this->_coins.emplace_back(new Coin(pair, stepSize));
+            if (it->first == "ETHBTC" || it->first == "XRPBTC" || it->first == "BNBBTC" || it->first == "LTCBTC" || it->first == "VETBTC" || it->first == "DOTBTC" || it->first == "ADABTC" || it->first == "NANOBTC" || it->first == "TXRBTC" || it->first == "LINKBTC" || it->first == "BCHBTC")
+                this->_coins.emplace_back(new Coin(pair, stepSize));
         }
     }
     return (EXIT_SUCCESS);
@@ -57,7 +57,7 @@ void Server::contextRun_thread()
 
 /* PUBLIC */
 
-int Server::runEMAHistory()
+int Server::runHistory()
 {
     Database database(std::getenv("DATABASE_HISTORY_NAME"));
 
@@ -70,19 +70,26 @@ int Server::runEMAHistory()
         if (!databaseResult.getConnection().is_open())
             return (EXIT_FAILURE);
         pqxx::transaction transactionResult(databaseResult.getConnection());
-        transactionResult.exec("DELETE FROM transaction");
+        transactionResult.exec("DELETE FROM transactions");
         transactionResult.commit();
         databaseResult.getConnection().close();
 
         pqxx::transaction transaction(database.getConnection());
         for (size_t i = 0; i < this->_coins.size(); ++i)
         {
-            if (this->_coins[i]->_pair != "PIVXBTC")
-                continue;
             pqxx::result result = transaction.exec("SELECT MIN(open_time) FROM candles WHERE pair='" + this->_coins[i]->_pair + "'");
             if (result.empty())
                 return (EXIT_FAILURE);
-            if (this->_coins[i]->init(this->_api, std::stoul(result.front().front().c_str())) == EXIT_FAILURE)
+            size_t endTime = 0;
+            try
+            {
+                endTime = std::stoul(result.front().front().c_str());
+            }
+            catch (const std::exception &)
+            {
+                continue;
+            }
+            if (this->_coins[i]->init(this->_api, endTime) == EXIT_FAILURE)
                 continue;
 
             pqxx::stream_from stream = pqxx::stream_from::query(transaction, "SELECT interval, open_time, close_time, open_price, close_price, low_price, high_price, volume, quote_volume, taker_buy_volume, taker_buy_quote_volume, trade_count FROM candles WHERE pair='" + this->_coins[i]->_pair + "' ORDER BY open_time ASC");
@@ -129,7 +136,7 @@ int Server::runEMAHistory()
     return (EXIT_SUCCESS);
 }
 
-int Server::runEMA()
+int Server::runProduction()
 {
     std::thread contextThread = std::thread(&Server::contextRun_thread, this);
 
@@ -139,13 +146,18 @@ int Server::runEMA()
             return (EXIT_FAILURE);
 
         Coin *coin = this->_coins[i];
-        this->_ws->klines(this->_coins[i]->_pair.c_str(), INTERVAL, [coin](const char *fl, int ec, std::string errmsg, binapi::ws::kline_t kline) {
+        this->_ws->klines(this->_coins[i]->_pair.c_str(), INTERVAL, [this, coin](const char *fl, int ec, std::string errmsg, binapi::ws::kline_t kline) {
             if (ec)
             {
                 std::cerr << "subscribe klines error: fl=" << fl << ", ec=" << ec << ", errmsg=" << errmsg << std::endl;
                 return (false);
             }
-            coin->updateCallback(kline);
+            if (this->_currentKlines.find(coin->_pair) != this->_currentKlines.end() &&
+                kline.t != this->_currentKlines[coin->_pair].t)
+            {
+                coin->updateCallback(this->_currentKlines[coin->_pair]);
+            }
+            this->_currentKlines[coin->_pair] = kline;
             return (true);
         });
     }
@@ -156,13 +168,15 @@ int Server::runEMA()
 
 int Server::run()
 {
-    if (SHORT >= LONG || std::min(SHORT, LONG) <= 0)
+    if (EMA_SHORT >= EMA_LONG || std::min(EMA_SHORT, EMA_LONG) <= 0)
     {
         std::cerr << "SHORT must be smaller than LONG (Range [1-1000])" << std::endl;
         return (EXIT_FAILURE);
     }
+    if (!HISTORY && FetchUsers::fetch(this->_ioctx, this->_users))
+        return (EXIT_FAILURE);
     if (this->fetchCoins() == EXIT_FAILURE)
         return (EXIT_FAILURE);
-    HISTORY ? runEMAHistory() : runEMA();
+    HISTORY ? this->runHistory() : this->runProduction();
     return (EXIT_SUCCESS);
 }

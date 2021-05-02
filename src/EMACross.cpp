@@ -4,49 +4,54 @@ EMACross::EMACross() : _cross(cross_e::NONE)
 {
 }
 
+EMACross::~EMACross()
+{
+}
+
 /* PRIVATE */
 
 void EMACross::updateCross(binapi::double_type prevShortaverage, binapi::double_type prevLongAverage)
 {
     if (prevShortaverage == prevLongAverage)
         return;
-    if ((prevShortaverage < prevLongAverage) && (this->_EMA.currentShort > this->_EMA.currentLong))
+    if ((prevShortaverage < prevLongAverage) && (this->_EMAShort.getStatus() > this->_EMALong.getStatus()))
         this->_cross = cross_e::CROSS_UP;
-    else if ((prevShortaverage > prevLongAverage) && (this->_EMA.currentShort < this->_EMA.currentLong))
+    else if ((prevShortaverage > prevLongAverage) && (this->_EMAShort.getStatus() < this->_EMALong.getStatus()))
         this->_cross = cross_e::CROSS_DOWN;
 }
 
-void EMACross::addNewCandle()
+void EMACross::addNewCandle(const binapi::ws::kline_t &kline)
 {
-    binapi::double_type prevShortaverage = this->_EMA.currentShort;
-    binapi::double_type prevLongAverage = this->_EMA.currentLong;
+    binapi::double_type prevShortaverage = this->_EMAShort.getStatus();
+    binapi::double_type prevLongAverage = this->_EMALong.getStatus();
 
-    this->_EMA.update(this->_currentCandle.closePrice);
+    this->_EMAShort.update(kline.c, EMA_SHORT);
+    this->_EMALong.update(kline.c, EMA_LONG);
     this->updateCross(prevShortaverage, prevLongAverage);
 }
 
 /* PUBLIC */
 
-result_t EMACross::update(const binapi::ws::kline_t &kline)
+statusEMACross_t EMACross::getStatus()
 {
-    result_t result;
+    statusEMACross_t status;
 
-    this->_cross = cross_e::NONE;
-    result.candle = this->_currentCandle;
-    if (kline.t != this->_currentCandle.startTime)
-        this->addNewCandle();
-    this->_currentCandle = candle_t{kline.t, kline.o, kline.c};
-    result.cross = this->_cross;
-    result.EMA = this->_EMA;
-    return (result);
+    status.cross = this->_cross;
+    status.EMAShort = this->_EMAShort;
+    return (status);
 }
 
-int EMACross::init(const std::vector<binapi::rest::klines_t::kline_t> &klines)
+void EMACross::update(const binapi::ws::kline_t &kline)
 {
-    if (klines.size() < 2)
-        return (EXIT_FAILURE);
-    for (size_t i = 0; i < klines.size() - 1; ++i)
-        this->_EMA.update(klines[i].close);
-    this->_currentCandle = candle_t{klines.back().start_time, klines.back().close};
-    return (EXIT_SUCCESS);
+    this->_cross = cross_e::NONE;
+    this->addNewCandle(kline);
+}
+
+void EMACross::init(const std::vector<binapi::rest::klines_t::kline_t> &klines)
+{
+    for (size_t i = 0; i < klines.size(); ++i)
+    {
+        this->_EMAShort.update(klines[i].close, EMA_SHORT);
+        this->_EMALong.update(klines[i].close, EMA_LONG);
+    }
 }

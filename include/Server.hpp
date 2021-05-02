@@ -11,6 +11,8 @@
 #include "Params.h"
 #include "Coin.hpp"
 #include "Database.hpp"
+#include "FetchUsers.hpp"
+#include "User.hpp"
 
 class Server
 {
@@ -19,19 +21,21 @@ public:
     ~Server();
 
 public:
-    int runEMAHistory();
-    int runEMA();
     int run();
 
 private:
     int fetchCoins();
     void contextRun_thread();
+    int runHistory();
+    int runProduction();
 
 private:
     binapi::rest::api *_api;
     binapi::ws::websockets_pool *_ws;
     boost::asio::io_context _ioctx;
+    std::vector<User *> _users;
     std::vector<Coin *> _coins;
+    std::map<std::string, binapi::ws::kline_t> _currentKlines;
 };
 
 #endif // SERVER_HPP

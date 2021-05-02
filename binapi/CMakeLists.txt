@@ -47,7 +47,7 @@ set(BINAPI_SOURCES
 add_executable(
     ${PROJECT_NAME}
     #
-    ${EMA_SOURCES}
+    ${TRADING_BOT_SOURCES}
     #
     ${BINAPI_SOURCES}
 )

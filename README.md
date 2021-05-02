@@ -8,13 +8,17 @@ Trading bot is using binapi : https://github.com/niXman/binapi<br>
 ~$ sudo apt install libssl-dev
 ~$ sudo apt install rapidjson-dev
 ~$
-~$ git clone https://github.com/mysql/mysql-connector-cpp.git
-~$ cd mysql-connector-cpp
-~$ git checkout 8.0
-~$ cmake . -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_BUILD_TYPE=Release
-~$ sudo cmake --build . --target install
-~$ sudo mv /usr/include/mysql-cppconn-8/* /usr/include && sudo rm -rf /usr/include/mysql-cppconn-8
-```
+~$ wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+~$ echo "deb [arch=amd64] http://apt.postgresql.org/pub/repos/apt/ `lsb_release -cs`-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list
+~$ sudo apt update
+~$ sudo apt install libpq-dev
+~$ sudo apt install postgresql
+~$ git clone https://github.com/jtv/libpqxx
+~$ cd libpqxx
+~$ git checkout 7.4.1
+~$ ./configure --disable-documentation
+~$ make
+~$ sudo make install
 
 <br>**Build steps :**
 ```console

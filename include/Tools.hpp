@@ -32,6 +32,10 @@ namespace Tools
             std::string ms = std::to_string(timestamp).substr(10, 12);
             return (day + "/" + month + "/" + year + " " + hour + ":" + min + ":" + sec + "." + ms);
         }
+        static int diffHour(size_t timestamp1, size_t timestamp2)
+        {
+            return (std::abs(static_cast<int>(timestamp1 - timestamp2)) / 3600000);
+        }
         static int diffSec(size_t timestamp1, size_t timestamp2)
         {
             return (std::abs(static_cast<int>(timestamp1 - timestamp2)) / 1000);

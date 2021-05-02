@@ -7,5 +7,10 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "node-binance-api": "^0.12.5",
+    "pg": "^8.5.1",
+    "pg-query-stream": "^4.0.0"
+  }
 }
