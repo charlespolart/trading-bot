@@ -7,6 +7,7 @@ Trading bot is using binapi : https://github.com/niXman/binapi<br>
 ~$ sudo apt install libboost-all-dev
 ~$ sudo apt install libssl-dev
 ~$ sudo apt install rapidjson-dev
+~$ sudo apt install libcurl4-openssl-dev
 ~$
 ~$ wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
 ~$ echo "deb [arch=amd64] http://apt.postgresql.org/pub/repos/apt/ `lsb_release -cs`-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list
