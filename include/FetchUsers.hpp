@@ -33,7 +33,7 @@ private:
         size_t size = 0;
         char *file = nullptr;
 
-        if (!(path = std::ifstream("/etc/bhft/person.json") ? "/etc/bhft/person.json" : std::getenv("PERSON_FILE_BHFT")))
+        if (!(path = std::ifstream("/etc/trading_bot/person.json") ? "/etc/trading_bot/person.json" : std::getenv("PERSON_FILE_TRADING_BOT")))
         {
             std::cerr << "Person file not found" << std::endl;
             return (EXIT_FAILURE);
