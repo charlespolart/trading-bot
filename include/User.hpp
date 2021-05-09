@@ -1,9 +1,13 @@
 #ifndef USER_HPP
 #define USER_HPP
 
+#include <thread>
+
 #include <boost/asio/io_context.hpp>
 
 #include <binapi/api.hpp>
+
+#include "Tools.hpp"
 
 class User
 {
@@ -16,6 +20,8 @@ public:
 
 public:
     std::string getName() const;
+    binapi::rest::new_order_info_full_t buy(const std::string &coin);
+    void sell(const std::string &coin, binapi::double_type stepSize);
 
 private:
     binapi::rest::api *_api;
@@ -23,6 +29,8 @@ private:
 
     std::string _name;
     std::string _btcAmount;
+    std::map<std::string, binapi::rest::new_order_info_full_t> _boughtList;
+    std::mutex _mutex;
 };
 
 #endif // USER_HPP

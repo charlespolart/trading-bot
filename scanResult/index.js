@@ -1,11 +1,13 @@
-const Binance = require('node-binance-api');
+//const Binance = require('node-binance-api');
 const { Client } = require('pg');
 const QueryStream = require('pg-query-stream');
 
-const binance = new Binance().options({
+/*const binance = new Binance().options({
     APIKEY: '',
     APISECRET: ''
-});
+});*/
+
+const initialMoney = 1000;
 
 const client = new Client({
     user: 'postgres',
@@ -27,6 +29,38 @@ client.connect().finally(() => {
     });
 });
 
+function computeGainz(data, gainzList, lastBuy) {
+    if (data['type'] === 'SELL' && Object.keys(lastBuy.data).length !== 0) {
+        let gainz = (data['close_price'] - lastBuy.data['close_price']) / lastBuy.data['close_price'] * 100;
+        gainzList.push(gainz);
+        //console.log(gainz, lastBuy.data['rsi']);
+        lastBuy.data = {};
+    }
+    if (data['type'] === 'BUY') {
+        lastBuy.data = data;
+    }
+}
+
+function computeResult(pair, gainzList, totalList) {
+    /*gainzList.sort((a, b) => {
+        return (a - b);
+    });*/
+    let currentMoney = initialMoney;
+    let total = 0;
+
+    for (let i = 0; i < gainzList.length; ++i) {
+        currentMoney += currentMoney / 100 * gainzList[i];
+        //total += gainzList[i];
+        //console.log(gainzList[i]);
+    }
+    //totalList.push(total);
+    totalList.push(currentMoney);
+    //console.log(pair, 'total: ', total);
+    let totalEuro = currentMoney;
+    let totalPercent = (currentMoney - initialMoney) / initialMoney * 100;
+    console.log(pair, 'total:', totalEuro.toFixed(2) + '€', totalPercent.toFixed(2) + '%');
+}
+
 async function run(pairs) {
     let totalList = [];
 
@@ -42,38 +76,18 @@ async function run(pairs) {
                     computeGainz(data, gainzList, lastBuy);
                 });
                 stream.on('end', () => {
-                    gainzList.sort((a, b) => {
-                        return (a - b);
-                    });
-                    let total = 0;
-                    for (let i = 0; i < gainzList.length; ++i) {
-                        total += gainzList[i];
-                        //console.log(gainzList[i]);
-                    }
-                    totalList.push(total);
-                    console.log(pairs[i], 'total: ', total);
+                    computeResult(pairs[i], gainzList, totalList);
                     resolve();
                 });
             });
             await promise;
-            //console.log(`SELECT pair FROM transactions WHERE pair='${pairs[i]}'`);
         }
     }
     let total = 0;
     for (let i = 0; i < totalList.length; ++i) {
         total += totalList[i];
     }
-    console.log('Grand total: ', total);
-}
-
-function computeGainz(data, gainzList, lastBuy) {
-    if (data['type'] === 'SELL' && Object.keys(lastBuy.data).length !== 0) {
-        let gainz = (data['close_price'] - lastBuy.data['close_price']) / lastBuy.data['close_price'] * 100;
-        gainzList.push(gainz);
-        //console.log(gainz, lastBuy.data['rsi']);
-        lastBuy.data = {};
-    }
-    if (data['type'] === 'BUY') {
-        lastBuy.data = data;
-    }
+    let totalEuro = total;
+    let totalPercent = (total - initialMoney * pairs.length) / (initialMoney * pairs.length) * 100;
+    console.log('Grand total:', totalEuro.toFixed(2) + '€', totalPercent.toFixed(2) + '%');
 }

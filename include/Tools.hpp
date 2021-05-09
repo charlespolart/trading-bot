@@ -60,6 +60,10 @@ namespace Tools
             stream << std::fixed << std::setprecision(precision) << std::floor(n * trunc) / trunc;
             return (stream.str());
         }
+        static int getPrecision(binapi::double_type n)
+        {
+            return (getPrecision(static_cast<double>(n)));
+        }
         static int getPrecision(double n)
         {
             return (std::floor(n) == n ? 0 : n == 1.0 ? 0
