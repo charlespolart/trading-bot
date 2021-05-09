@@ -19,6 +19,7 @@ Trading bot is using binapi : https://github.com/niXman/binapi<br>
 ~$ ./configure --disable-documentation
 ~$ make
 ~$ sudo make install
+```
 
 <br>**Build steps :**
 ```console
@@ -50,4 +51,12 @@ It can be overwrited by setting the environment variable ***"PERSON_FILE_TRADING
         }
     ]
 }
+```
+<br>**Dump results database :**<br>
+```console
+~$ sudo -Hiu postgres pg_dump -h localhost $DATABASE_RESULT_NAME > $DATABASE_RESULT_NAME"_dump"
+```
+<br>**Restore results database :**<br>
+```console
+~$ sudo -Hiu postgres psql -h localhost $DATABASE_RESULT_NAME < $DATABASE_RESULT_NAME"_dump"
 ```
