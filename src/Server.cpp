@@ -150,7 +150,7 @@ int Server::runProduction()
             if (ec)
             {
                 std::cerr << "subscribe klines error: fl=" << fl << ", ec=" << ec << ", errmsg=" << errmsg << std::endl;
-                return (false);
+                return (true);
             }
             if (this->_currentKlines.find(coin->_pair) != this->_currentKlines.end() &&
                 kline.t != this->_currentKlines[coin->_pair].t)
