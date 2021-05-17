@@ -12,7 +12,6 @@
 
 namespace Tools
 {
-
     class Date
     {
     public:

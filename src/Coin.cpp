@@ -39,7 +39,7 @@ void Coin::updateCallback(const binapi::ws::kline_t &kline)
     signal_e signal = signal_e::NONE;
 
     this->_indicators.update(kline);
-    signal = this->_indicators.fetchSignal();
+    signal = this->fetchSignal(kline);
     if (signal == signal_e::BUY)
     {
         this->buy(kline);
@@ -52,6 +52,23 @@ void Coin::updateCallback(const binapi::ws::kline_t &kline)
 
 /* PRIVATE */
 
+signal_e Coin::fetchSignal(const binapi::ws::kline_t &kline)
+{
+    binapi::double_type ATR = this->_indicators.getATRStatus();
+    statusEMACross_t statusEMACrossBuy = this->_indicators.getEMACrossBuyStatus();
+    binapi::double_type RSI = this->_indicators.getRSIStatus();
+
+    if (statusEMACrossBuy.cross == cross_e::CROSS_UP && RSI >= RSI_MIN_BUY)
+    {
+        return (signal_e::BUY);
+    }
+    else if (statusEMACrossBuy.cross == cross_e::CROSS_DOWN)
+    {
+        return (signal_e::SELL);
+    }
+    return (signal_e::NONE);
+}
+
 void Coin::buy(const binapi::ws::kline_t &kline)
 {
     for (size_t i = 0; i < this->_users.size(); ++i)
@@ -63,7 +80,7 @@ void Coin::buy(const binapi::ws::kline_t &kline)
     }
     Database database(HISTORY ? std::getenv("DATABASE_RESULT_HISTORY_NAME") : std::getenv("DATABASE_RESULT_NAME"));
     pqxx::work work(database.getConnection());
-    work.exec("INSERT INTO transactions VALUES ('" + kline.s + "', '" + kline.i + "', '" + std::to_string(kline.t) + "', '" + std::to_string(kline.T) + "', '" + Tools::Convert::to_string(kline.o, 8) + "', '" + Tools::Convert::to_string(kline.c, 8) + "', '" + Tools::Convert::to_string(kline.l, 8) + "', '" + Tools::Convert::to_string(kline.h, 8) + "', '" + Tools::Convert::to_string(kline.v, 8) + "', '" + Tools::Convert::to_string(kline.q, 8) + "', '" + Tools::Convert::to_string(kline.V, 8) + "', '" + Tools::Convert::to_string(kline.Q, 8) + "', '" + std::to_string(kline.n) + "', 'BUY', '" + Tools::Convert::to_string(this->_indicators.getEMACrossStatus().EMAShort.getStatus(), 8) + "',  '" + Tools::Convert::to_string(this->_indicators.getRSIStatus(), 8) + "')");
+    work.exec("INSERT INTO transactions VALUES ('" + kline.s + "', '" + kline.i + "', '" + std::to_string(kline.t) + "', '" + std::to_string(kline.T) + "', '" + Tools::Convert::to_string(kline.o, 8) + "', '" + Tools::Convert::to_string(kline.c, 8) + "', '" + Tools::Convert::to_string(kline.l, 8) + "', '" + Tools::Convert::to_string(kline.h, 8) + "', '" + Tools::Convert::to_string(kline.v, 8) + "', '" + Tools::Convert::to_string(kline.q, 8) + "', '" + Tools::Convert::to_string(kline.V, 8) + "', '" + Tools::Convert::to_string(kline.Q, 8) + "', '" + std::to_string(kline.n) + "', 'BUY', '" + Tools::Convert::to_string(this->_indicators.getEMACrossBuyStatus().EMAShort.getStatus(), 8) + "',  '" + Tools::Convert::to_string(this->_indicators.getRSIStatus(), 8) + "')");
     work.commit();
     database.getConnection().close();
 }
@@ -79,7 +96,7 @@ void Coin::sell(const binapi::ws::kline_t &kline)
     }
     Database database(HISTORY ? std::getenv("DATABASE_RESULT_HISTORY_NAME") : std::getenv("DATABASE_RESULT_NAME"));
     pqxx::work work(database.getConnection());
-    work.exec("INSERT INTO transactions VALUES ('" + kline.s + "', '" + kline.i + "', '" + std::to_string(kline.t) + "', '" + std::to_string(kline.T) + "', '" + Tools::Convert::to_string(kline.o, 8) + "', '" + Tools::Convert::to_string(kline.c, 8) + "', '" + Tools::Convert::to_string(kline.l, 8) + "', '" + Tools::Convert::to_string(kline.h, 8) + "', '" + Tools::Convert::to_string(kline.v, 8) + "', '" + Tools::Convert::to_string(kline.q, 8) + "', '" + Tools::Convert::to_string(kline.V, 8) + "', '" + Tools::Convert::to_string(kline.Q, 8) + "', '" + std::to_string(kline.n) + "', 'SELL', '" + Tools::Convert::to_string(this->_indicators.getEMACrossStatus().EMAShort.getStatus(), 8) + "',  '" + Tools::Convert::to_string(this->_indicators.getRSIStatus(), 8) + "')");
+    work.exec("INSERT INTO transactions VALUES ('" + kline.s + "', '" + kline.i + "', '" + std::to_string(kline.t) + "', '" + std::to_string(kline.T) + "', '" + Tools::Convert::to_string(kline.o, 8) + "', '" + Tools::Convert::to_string(kline.c, 8) + "', '" + Tools::Convert::to_string(kline.l, 8) + "', '" + Tools::Convert::to_string(kline.h, 8) + "', '" + Tools::Convert::to_string(kline.v, 8) + "', '" + Tools::Convert::to_string(kline.q, 8) + "', '" + Tools::Convert::to_string(kline.V, 8) + "', '" + Tools::Convert::to_string(kline.Q, 8) + "', '" + std::to_string(kline.n) + "', 'SELL', '" + Tools::Convert::to_string(this->_indicators.getEMACrossBuyStatus().EMAShort.getStatus(), 8) + "',  '" + Tools::Convert::to_string(this->_indicators.getRSIStatus(), 8) + "')");
     work.commit();
     database.getConnection().close();
 }

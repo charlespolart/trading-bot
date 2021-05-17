@@ -3,7 +3,7 @@ const mysql = require('mysql');
 
 const START_TIME = 1575072000000;
 const END_TIME = 1616931900000;
-const INTERVAL = "15m";
+const INTERVAL = "1h";
 
 const binance = new Binance().options({
     APIKEY: '',
@@ -34,9 +34,9 @@ function fetchCoins() {
             }
         }
         pairs.sort();
-        let i = 0;
+        /*let i = 0;
         for (i = 0; i < pairs.length && pairs[i] !== 'XVGBTC'; ++i);
-        pairs.splice(0, i);
+        pairs.splice(0, i);*/
         fillDatabase();
     });
 }
@@ -45,7 +45,7 @@ async function fillDatabase() {
     const now = Date.now();
     for (let i = 0; i < pairs.length; ++i) {
         console.log("Adding " + pairs[i]);
-        await candlesticks(pairs[i], START_TIME, now);
+        await candlesticks(pairs[i], START_TIME, END_TIME);
     }
     connection.end(function (err) {
         if (err) throw err;

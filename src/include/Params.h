@@ -1,7 +1,7 @@
 #ifndef PARAMS_H
 #define PARAMS_H
 
-#define HISTORY false
+#define HISTORY true
 #define HISTORY_START 1617448194000
 #define HISTORY_END 1617448194000
 
@@ -11,11 +11,15 @@
 #define EMA_SHORT_BUY 50
 #define EMA_LONG_BUY 200
 
-/* RSI */
+/* EMA CROSS SELL */
+#define EMA_SHORT_SELL 20
+#define EMA_LONG_SELL 200
+
+/*  RSI */
 #define RSI_LENGTH 14
 #define RSI_MIN_BUY 50
 
-/* ATR */
-#define ATR_LENGTH 14
+/* RESISTANCE */
+#define RESISTANCE_LENGTH 50
 
 #endif // PARAMS_H

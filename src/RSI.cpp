@@ -14,8 +14,8 @@ void RSI::updateEMAs(binapi::double_type currentPrice, binapi::double_type previ
 {
     binapi::double_type change = currentPrice - previousPrice;
 
-    this->_EMAUp.update(change > 0.0 ? change : 0.0, RSI_LENGTH);
-    this->_EMADown.update(change < 0.0 ? change * -1.0 : 0.0, RSI_LENGTH);
+    this->_EMAUp.update(change > 0.0 ? change : 0.0);
+    this->_EMADown.update(change < 0.0 ? change * -1.0 : 0.0);
 }
 
 void RSI::update(binapi::double_type currentPrice)
@@ -30,7 +30,7 @@ void RSI::update(binapi::double_type currentPrice)
 
 /* PUBLIC */
 
-binapi::double_type RSI::getStatus()
+binapi::double_type RSI::getStatus() const
 {
     return (this->_RSI);
 }
@@ -41,8 +41,10 @@ void RSI::update(const binapi::ws::kline_t &kline)
     this->_lastPrice = kline.c;
 }
 
-void RSI::init(const std::vector<binapi::rest::klines_t::kline_t> &klines)
+void RSI::init(const std::vector<binapi::rest::klines_t::kline_t> &klines, int length)
 {
+    this->_EMAUp.init(length);
+    this->_EMADown.init(length);
     for (size_t i = 0; i < klines.size(); ++i)
     {
         if (i > 0)

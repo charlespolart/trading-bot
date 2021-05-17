@@ -1,8 +1,8 @@
 #ifndef INDICATORS_HPP
 #define INDICATORS_HPP
 
-#include "ATR.hpp"
 #include "EMACross.hpp"
+#include "Resistance.hpp"
 #include "RSI.hpp"
 
 class Indicators
@@ -12,15 +12,17 @@ public:
     ~Indicators();
 
 public:
-    binapi::double_type getATRStatus() const;
     statusEMACross_t getEMACrossBuyStatus() const;
+    statusEMACross_t getEMACrossSellStatus() const;
+    binapi::double_type getResistanceStatus() const;
     binapi::double_type getRSIStatus() const;
     void init(const std::vector<binapi::rest::klines_t::kline_t> &klines);
     void update(const binapi::ws::kline_t &kline);
 
 private:
-    ATR _ATR;
     EMACross _EMACrossBuy;
+    EMACross _EMACrossSell;
+    Resistance _resistance;
     RSI _RSI;
 };
 
