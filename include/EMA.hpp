@@ -12,10 +12,12 @@ public:
     ~EMA();
 
 public:
-    binapi::double_type getStatus();
-    void update(binapi::double_type value, int period);
+    binapi::double_type getStatus() const;
+    void init(int length);
+    void update(binapi::double_type value);
 
 private:
+    int _length;
     binapi::double_type _EMA;
 };
 

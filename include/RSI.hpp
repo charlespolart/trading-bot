@@ -15,9 +15,9 @@ public:
     ~RSI();
 
 public:
-    binapi::double_type getStatus();
+    binapi::double_type getStatus() const;
     void update(const binapi::ws::kline_t &kline);
-    void init(const std::vector<binapi::rest::klines_t::kline_t> &klines);
+    void init(const std::vector<binapi::rest::klines_t::kline_t> &klines, int length);
 
 private:
     void updateEMAs(binapi::double_type currentPrice, binapi::double_type previousPrice);

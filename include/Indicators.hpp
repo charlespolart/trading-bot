@@ -1,15 +1,9 @@
 #ifndef INDICATORS_HPP
 #define INDICATORS_HPP
 
+#include "ATR.hpp"
 #include "EMACross.hpp"
 #include "RSI.hpp"
-
-enum class signal_e
-{
-    NONE,
-    BUY,
-    SELL
-};
 
 class Indicators
 {
@@ -18,14 +12,15 @@ public:
     ~Indicators();
 
 public:
-    statusEMACross_t getEMACrossStatus();
-    binapi::double_type getRSIStatus();
+    binapi::double_type getATRStatus() const;
+    statusEMACross_t getEMACrossBuyStatus() const;
+    binapi::double_type getRSIStatus() const;
     void init(const std::vector<binapi::rest::klines_t::kline_t> &klines);
-    signal_e fetchSignal();
     void update(const binapi::ws::kline_t &kline);
 
 private:
-    EMACross _EMACross;
+    ATR _ATR;
+    EMACross _EMACrossBuy;
     RSI _RSI;
 };
 

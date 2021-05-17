@@ -10,40 +10,31 @@ Indicators::~Indicators()
 
 /* PUBLIC */
 
-statusEMACross_t Indicators::getEMACrossStatus()
+binapi::double_type Indicators::getATRStatus() const
 {
-    return (this->_EMACross.getStatus());
+    return (this->_ATR.getStatus());
 }
 
-binapi::double_type Indicators::getRSIStatus()
+statusEMACross_t Indicators::getEMACrossBuyStatus() const
+{
+    return (this->_EMACrossBuy.getStatus());
+}
+
+binapi::double_type Indicators::getRSIStatus() const
 {
     return (this->_RSI.getStatus());
 }
 
 void Indicators::init(const std::vector<binapi::rest::klines_t::kline_t> &klines)
 {
-    this->_EMACross.init(klines);
-    this->_RSI.init(klines);
-}
-
-signal_e Indicators::fetchSignal()
-{
-    statusEMACross_t statusEMACross = this->_EMACross.getStatus();
-    binapi::double_type RSI = this->_RSI.getStatus();
-
-    if (statusEMACross.cross == cross_e::CROSS_UP && RSI >= RSI_MIN_BUY)
-    {
-        return (signal_e::BUY);
-    }
-    else if (statusEMACross.cross == cross_e::CROSS_DOWN)
-    {
-        return (signal_e::SELL);
-    }
-    return (signal_e::NONE);
+    this->_ATR.init(klines, ATR_LENGTH);
+    this->_EMACrossBuy.init(klines, EMA_SHORT_BUY, EMA_LONG_BUY);
+    this->_RSI.init(klines, RSI_LENGTH);
 }
 
 void Indicators::update(const binapi::ws::kline_t &kline)
 {
-    this->_EMACross.update(kline);
+    this->_ATR.update(kline);
+    this->_EMACrossBuy.update(kline);
     this->_RSI.update(kline);
 }

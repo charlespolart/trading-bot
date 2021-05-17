@@ -11,6 +11,14 @@
 #include "Tools.hpp"
 #include "User.hpp"
 
+
+enum class signal_e
+{
+    NONE,
+    BUY,
+    SELL
+};
+
 class Coin
 {
 public:
@@ -26,6 +34,7 @@ public:
     int init(binapi::rest::api *api, size_t endTime = 0);
 
 private:
+    signal_e fetchSignal(const binapi::ws::kline_t &kline);
     void buy(const binapi::ws::kline_t &kline);
     void sell(const binapi::ws::kline_t &kline);
 

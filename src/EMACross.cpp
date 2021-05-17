@@ -25,14 +25,14 @@ void EMACross::addNewCandle(const binapi::ws::kline_t &kline)
     binapi::double_type prevShortaverage = this->_EMAShort.getStatus();
     binapi::double_type prevLongAverage = this->_EMALong.getStatus();
 
-    this->_EMAShort.update(kline.c, EMA_SHORT);
-    this->_EMALong.update(kline.c, EMA_LONG);
+    this->_EMAShort.update(kline.c);
+    this->_EMALong.update(kline.c);
     this->updateCross(prevShortaverage, prevLongAverage);
 }
 
 /* PUBLIC */
 
-statusEMACross_t EMACross::getStatus()
+statusEMACross_t EMACross::getStatus() const
 {
     statusEMACross_t status;
 
@@ -47,11 +47,13 @@ void EMACross::update(const binapi::ws::kline_t &kline)
     this->addNewCandle(kline);
 }
 
-void EMACross::init(const std::vector<binapi::rest::klines_t::kline_t> &klines)
+void EMACross::init(const std::vector<binapi::rest::klines_t::kline_t> &klines, int EMAShort, int EMALong)
 {
+    this->_EMAShort.init(EMAShort);
+    this->_EMALong.init(EMALong);
     for (size_t i = 0; i < klines.size(); ++i)
     {
-        this->_EMAShort.update(klines[i].close, EMA_SHORT);
-        this->_EMALong.update(klines[i].close, EMA_LONG);
+        this->_EMAShort.update(klines[i].close);
+        this->_EMALong.update(klines[i].close);
     }
 }

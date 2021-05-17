@@ -39,7 +39,7 @@ int Server::fetchCoins()
         {
             std::string pair = it->first;
             binapi::double_type stepSize = it->second.get_filter_lot().stepSize;
-            if (it->first == "ETHBTC" || it->first == "XRPBTC" || it->first == "BNBBTC" || it->first == "LTCBTC" || it->first == "VETBTC" || it->first == "DOTBTC" || it->first == "ADABTC" || it->first == "NANOBTC" || it->first == "TXRBTC" || it->first == "LINKBTC" || it->first == "BCHBTC")
+            //if (it->first == "ETHBTC" || it->first == "XRPBTC" || it->first == "BNBBTC" || it->first == "LTCBTC" || it->first == "VETBTC" || it->first == "DOTBTC" || it->first == "ADABTC" || it->first == "NANOBTC" || it->first == "TXRBTC" || it->first == "LINKBTC" || it->first == "BCHBTC")
                 this->_coins.emplace_back(new Coin(this->_ioctx, pair, stepSize, this->_users));
         }
     }
@@ -92,7 +92,7 @@ int Server::runHistory()
             if (this->_coins[i]->init(this->_api, endTime) == EXIT_FAILURE)
                 continue;
 
-            pqxx::stream_from stream = pqxx::stream_from::query(transaction, "SELECT interval, open_time, close_time, open_price, close_price, low_price, high_price, volume, quote_volume, taker_buy_volume, taker_buy_quote_volume, trade_count FROM candles WHERE pair='" + this->_coins[i]->_pair + "' ORDER BY open_time ASC");
+            pqxx::stream_from stream = pqxx::stream_from::query(transaction, "SELECT interval, open_time, close_time, open_price, close_price, low_price, high_price, volume, quote_volume, taker_buy_volume, taker_buy_quote_volume, trade_count FROM candles WHERE pair='" + this->_coins[i]->_pair + "' AND interval='" + INTERVAL + "' ORDER BY open_time ASC");
             std::tuple<std::string, size_t, size_t, std::string, std::string, std::string, std::string, std::string, std::string, std::string, std::string, int> row;
             while (stream >> row)
             {
@@ -168,11 +168,6 @@ int Server::runProduction()
 
 int Server::run()
 {
-    if (EMA_SHORT >= EMA_LONG || std::min(EMA_SHORT, EMA_LONG) <= 0)
-    {
-        std::cerr << "SHORT must be smaller than LONG (Range [1-1000])" << std::endl;
-        return (EXIT_FAILURE);
-    }
     if (!HISTORY && FetchUsers::fetch(this->_ioctx, this->_users))
         return (EXIT_FAILURE);
     if (this->fetchCoins() == EXIT_FAILURE)

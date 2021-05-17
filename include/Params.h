@@ -7,12 +7,15 @@
 
 #define INTERVAL "15m"
 
-/* EMA CROSS */
-#define EMA_SHORT 50
-#define EMA_LONG 200
+/* EMA CROSS BUY */
+#define EMA_SHORT_BUY 50
+#define EMA_LONG_BUY 200
 
-/*  RSI */
+/* RSI */
 #define RSI_LENGTH 14
 #define RSI_MIN_BUY 50
+
+/* ATR */
+#define ATR_LENGTH 14
 
 #endif // PARAMS_H

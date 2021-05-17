@@ -6,6 +6,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 set(TRADING_BOT_HEADERS
     ${CMAKE_CURRENT_SOURCE_DIR}/include/Params.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/ATR.hpp
     ${CMAKE_CURRENT_SOURCE_DIR}/include/Coin.hpp
     ${CMAKE_CURRENT_SOURCE_DIR}/include/Database.hpp
     ${CMAKE_CURRENT_SOURCE_DIR}/include/EMA.hpp
@@ -20,6 +21,7 @@ set(TRADING_BOT_HEADERS
 
 set(TRADING_BOT_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/ATR.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Coin.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Database.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/EMA.cpp
