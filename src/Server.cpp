@@ -39,7 +39,7 @@ int Server::fetchCoins()
         {
             std::string pair = it->first;
             binapi::double_type stepSize = it->second.get_filter_lot().stepSize;
-            //if (it->first == "ETHBTC" || it->first == "XRPBTC" || it->first == "BNBBTC" || it->first == "LTCBTC" || it->first == "VETBTC" || it->first == "DOTBTC" || it->first == "ADABTC" || it->first == "NANOBTC" || it->first == "TXRBTC" || it->first == "LINKBTC" || it->first == "BCHBTC")
+            if (it->first == "ETHBTC" || it->first == "XRPBTC" || it->first == "BNBBTC" || it->first == "LTCBTC" || it->first == "VETBTC" || it->first == "DOTBTC" || it->first == "ADABTC" || it->first == "NANOBTC" || it->first == "TXRBTC" || it->first == "LINKBTC" || it->first == "BCHBTC")
                 this->_coins.emplace_back(new Coin(this->_ioctx, pair, stepSize, this->_users));
         }
     }
@@ -55,7 +55,25 @@ void Server::contextRun_thread()
     }
 }
 
-/* PUBLIC */
+void Server::candle_callback(Coin *coin)
+{
+    this->_ws->klines(coin->_pair.c_str(), INTERVAL, [this, coin](const char *fl, int ec, std::string errmsg, binapi::ws::kline_t kline) {
+        if (ec)
+        {
+            std::cerr << "subscribe klines error: fl=" << fl << ", ec=" << ec << ", errmsg=" << errmsg << std::endl;
+            this->candle_callback(coin);
+            return (false);
+        }
+        if (this->_currentKlines.find(coin->_pair) != this->_currentKlines.end() &&
+            kline.t != this->_currentKlines[coin->_pair].t)
+        {
+            coin->updateCallback(this->_currentKlines[coin->_pair]);
+        }
+        this->_currentKlines[coin->_pair] = kline;
+        std::cout << kline.c << std::endl;
+        return (true);
+    });
+}
 
 int Server::runHistory()
 {
@@ -145,26 +163,14 @@ int Server::runProduction()
         if (this->_coins[i]->init(this->_api) == EXIT_FAILURE)
             return (EXIT_FAILURE);
 
-        Coin *coin = this->_coins[i];
-        this->_ws->klines(this->_coins[i]->_pair.c_str(), INTERVAL, [this, coin](const char *fl, int ec, std::string errmsg, binapi::ws::kline_t kline) {
-            if (ec)
-            {
-                std::cerr << "subscribe klines error: fl=" << fl << ", ec=" << ec << ", errmsg=" << errmsg << std::endl;
-                return (true);
-            }
-            if (this->_currentKlines.find(coin->_pair) != this->_currentKlines.end() &&
-                kline.t != this->_currentKlines[coin->_pair].t)
-            {
-                coin->updateCallback(this->_currentKlines[coin->_pair]);
-            }
-            this->_currentKlines[coin->_pair] = kline;
-            return (true);
-        });
+        this->candle_callback(this->_coins[i]);
     }
     if (contextThread.joinable())
         contextThread.join();
     return (EXIT_SUCCESS);
 }
+
+/* PUBLIC */
 
 int Server::run()
 {

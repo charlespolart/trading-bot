@@ -26,6 +26,7 @@ public:
 private:
     int fetchCoins();
     void contextRun_thread();
+    void candle_callback(Coin *coin);
     int runHistory();
     int runProduction();
 
