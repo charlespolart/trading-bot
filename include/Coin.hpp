@@ -11,12 +11,17 @@
 #include "Tools.hpp"
 #include "User.hpp"
 
-
 enum class signal_e
 {
     NONE,
     BUY,
     SELL
+};
+
+struct status_t
+{
+    bool bought = false;
+    binapi::double_type currentStopLoss = 0.0;
 };
 
 class Coin
@@ -34,9 +39,12 @@ public:
     int init(binapi::rest::api *api, size_t endTime = 0);
 
 private:
-    signal_e fetchSignal(const binapi::ws::kline_t &kline);
+    signal_e fetchSignal();
     void buy(const binapi::ws::kline_t &kline);
     void sell(const binapi::ws::kline_t &kline);
+    void setStopLoss(const binapi::ws::kline_t &kline);
+    void checkStopLossStatus(const binapi::ws::kline_t &kline);
+    void writeTransaction(const std::string &type, const binapi::ws::kline_t &kline);
 
 public:
     std::string _pair;
@@ -46,6 +54,7 @@ private:
     binapi::double_type _stepSize;
     Indicators _indicators;
     const std::vector<User *> &_users;
+    status_t _status;
 };
 
 #endif // COIN_HPP
