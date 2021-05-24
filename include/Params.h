@@ -18,4 +18,7 @@
 /* ATR */
 #define ATR_LENGTH 14
 
+/* STOP LOSS W/ ATR */
+#define STOP_LOSS_RATIO 1
+
 #endif // PARAMS_H

@@ -162,7 +162,6 @@ int Server::runProduction()
     {
         if (this->_coins[i]->init(this->_api) == EXIT_FAILURE)
             return (EXIT_FAILURE);
-
         this->candle_callback(this->_coins[i]);
     }
     if (contextThread.joinable())

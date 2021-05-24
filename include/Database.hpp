@@ -4,6 +4,10 @@
 #include <iostream>
 #include <pqxx/pqxx>
 
+#include <binapi/api.hpp>
+
+#include "Tools.hpp"
+
 class Database
 {
 public:
@@ -13,6 +17,7 @@ public:
 
 public:
     pqxx::connection &getConnection();
+    void writeTransaction(const std::string &type, const binapi::ws::kline_t &kline);
 
 private:
     pqxx::connection _connection;

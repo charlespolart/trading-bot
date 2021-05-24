@@ -30,13 +30,13 @@ client.connect().finally(() => {
 });
 
 function computeGainz(data, gainzList, lastBuy) {
-    if (data['type'] === 'SELL' && Object.keys(lastBuy.data).length !== 0) {
+    if (data['type'] === 'sell' && Object.keys(lastBuy.data).length !== 0) {
         let gainz = (data['close_price'] - lastBuy.data['close_price']) / lastBuy.data['close_price'] * 100;
         gainzList.push(gainz);
         //console.log(gainz, lastBuy.data['rsi']);
         lastBuy.data = {};
     }
-    if (data['type'] === 'BUY') {
+    if (data['type'] === 'buy') {
         lastBuy.data = data;
     }
 }
