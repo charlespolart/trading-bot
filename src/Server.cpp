@@ -39,7 +39,7 @@ int Server::fetchCoins()
         {
             std::string pair = it->first;
             binapi::double_type stepSize = it->second.get_filter_lot().stepSize;
-            if (it->first == "ETHBTC" || it->first == "XRPBTC" || it->first == "BNBBTC" || it->first == "LTCBTC" || it->first == "VETBTC" || it->first == "DOTBTC" || it->first == "ADABTC" || it->first == "NANOBTC" || it->first == "TXRBTC" || it->first == "LINKBTC" || it->first == "BCHBTC")
+            if (it->first == "ETHBTC" || it->first == "BNBBTC" || it->first == "ADABTC" || it->first == "XRPBTC" || it->first == "BCHBTC" || it->first == "XLMBTC" || it->first == "THETABTC" || it->first == "ETCBTC" || it->first == "VETBTC" || it->first == "MATICBTC" || it->first == "TRXBTC")
                 this->_coins.emplace_back(new Coin(this->_ioctx, pair, stepSize, this->_users));
         }
     }
@@ -70,7 +70,6 @@ void Server::candle_callback(Coin *coin)
             coin->updateCallback(this->_currentKlines[coin->_pair]);
         }
         this->_currentKlines[coin->_pair] = kline;
-        std::cout << kline.c << std::endl;
         return (true);
     });
 }
