@@ -15,6 +15,7 @@ set(TRADING_BOT_HEADERS
     ${CMAKE_CURRENT_SOURCE_DIR}/include/Indicators.hpp
     ${CMAKE_CURRENT_SOURCE_DIR}/include/RSI.hpp
     ${CMAKE_CURRENT_SOURCE_DIR}/include/Server.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/SwingLow.hpp
     ${CMAKE_CURRENT_SOURCE_DIR}/include/Tools.hpp
     ${CMAKE_CURRENT_SOURCE_DIR}/include/User.hpp
 )
@@ -29,6 +30,7 @@ set(TRADING_BOT_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Indicators.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/RSI.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Server.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/SwingLow.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/User.cpp
 )
 

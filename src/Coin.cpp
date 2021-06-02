@@ -36,24 +36,19 @@ int Coin::init(binapi::rest::api *api, size_t endTime)
 
 void Coin::updateCallback(const binapi::ws::kline_t &kline)
 {
-    signal_e signal = signal_e::NONE;
-
     this->_indicators.update(kline);
-    signal = this->fetchSignal();
 
-    if (!this->_status.bought)
+    signal_e signal = this->fetchSignal();
+
+    /* Buy signal */
+    if (!this->_status.bought && signal == signal_e::BUY)
     {
-        if (signal == signal_e::BUY)
-        {
-            this->buy(kline);
-        }
+        this->buy(kline);
     }
-    else
+    /* Sell signal */
+    else if (this->_status.bought && signal == signal_e::SELL)
     {
-        if (this->_status.bought && signal == signal_e::SELL)
-        {
-            this->sell(kline);
-        }
+        this->sell(kline);
     }
 }
 
@@ -101,11 +96,9 @@ void Coin::sell(const binapi::ws::kline_t &kline)
     this->writeTransaction("sell", kline);
 }
 
-void Coin::setStopLoss(const binapi::ws::kline_t &kline)
+void Coin::setStopLoss(binapi::double_type value)
 {
-    binapi::double_type ATR = this->_indicators.getATRStatus();
-
-    this->_status.currentStopLoss = kline.l - STOP_LOSS_RATIO * ATR;
+    this->_status.currentStopLoss = value;
 }
 
 void Coin::checkStopLossStatus(const binapi::ws::kline_t &kline)

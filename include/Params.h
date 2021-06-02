@@ -16,9 +16,10 @@
 #define RSI_MIN_BUY 50
 
 /* ATR */
-#define ATR_LENGTH 14
+#define ATR_LENGTH 14 // NO USE
 
-/* STOP LOSS W/ ATR */
-#define STOP_LOSS_RATIO 1
+/* STOP LOSS */
+#define STOP_LOSS_ATR 1 // NO USE
+#define EMA_SWING_LOW 20 // NO USE
 
 #endif // PARAMS_H

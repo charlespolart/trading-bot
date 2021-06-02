@@ -11,7 +11,7 @@
 #include "Tools.hpp"
 #include "User.hpp"
 
-enum class signal_e
+enum signal_e
 {
     NONE,
     BUY,
@@ -42,7 +42,7 @@ private:
     signal_e fetchSignal();
     void buy(const binapi::ws::kline_t &kline);
     void sell(const binapi::ws::kline_t &kline);
-    void setStopLoss(const binapi::ws::kline_t &kline);
+    void setStopLoss(binapi::double_type value);
     void checkStopLossStatus(const binapi::ws::kline_t &kline);
     void writeTransaction(const std::string &type, const binapi::ws::kline_t &kline);
 
