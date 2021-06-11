@@ -74,7 +74,6 @@ void Server::candle_callback(Coin *coin)
                 coin->updateCallback(this->_currentKlines[coin->_pair]);
             }
             this->_currentKlines[coin->_pair] = kline;
-            std::cout << kline.c << std::endl;
             return (true);
         });
 }
