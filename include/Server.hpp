@@ -37,6 +37,7 @@ private:
     std::vector<User *> _users;
     std::vector<Coin *> _coins;
     std::map<std::string, binapi::ws::kline_t> _currentKlines;
+    std::map<std::string, binapi::ws::websockets_pool::handle> _candleHandlers;
 };
 
 #endif // SERVER_HPP
