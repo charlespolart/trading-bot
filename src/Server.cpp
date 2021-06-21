@@ -39,7 +39,7 @@ int Server::fetchCoins()
         {
             std::string pair = it->first;
             binapi::double_type stepSize = it->second.get_filter_lot().stepSize;
-            if (it->first == "ETHBTC" /* || it->first == "BNBBTC" || it->first == "ADABTC" || it->first == "XRPBTC" || it->first == "BCHBTC" || it->first == "XLMBTC" || it->first == "THETABTC" || it->first == "ETCBTC" || it->first == "VETBTC" || it->first == "MATICBTC" || it->first == "TRXBTC"*/)
+            if (it->first == "TCTBTC" || it->first == "FTTBTC" || it->first == "UNIBTC" || it->first == "PAXGBTC" || it->first == "LTOBTC" || it->first == "EOSBTC" || it->first == "DCRBTC" || it->first == "XTZBTC" || it->first == "ZECBTC" || it->first == "THETABTC" || it->first == "TRXBTC" || it->first == "SUSDBTC" || it->first == "BCHBTC" || it->first == "BTGBTC" || it->first == "ETHBTC" || it->first == "ADABTC" || it->first == "WANBTC" || it->first == "ZENBTC" || it->first == "AAVEBTC" || it->first == "MKRBTC")
                 this->_coins.emplace_back(new Coin(this->_ioctx, pair, stepSize, this->_users));
         }
     }
@@ -80,7 +80,7 @@ void Server::candle_callback(Coin *coin)
 
 int Server::runHistory()
 {
-    Database database(std::getenv("DATABASE_HISTORY_NAME"));
+    Database database(std::getenv("DATABASE_HISTORY_TMP_NAME"));
 
     if (!database.getConnection().is_open())
         return (EXIT_FAILURE);
