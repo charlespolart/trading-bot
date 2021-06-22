@@ -39,7 +39,7 @@ int Server::fetchCoins()
         {
             std::string pair = it->first;
             binapi::double_type stepSize = it->second.get_filter_lot().stepSize;
-            if (it->first == "TCTBTC" || it->first == "FTTBTC" || it->first == "UNIBTC" || it->first == "PAXGBTC" || it->first == "LTOBTC" || it->first == "EOSBTC" || it->first == "DCRBTC" || it->first == "XTZBTC" || it->first == "ZECBTC" || it->first == "THETABTC" || it->first == "TRXBTC" || it->first == "SUSDBTC" || it->first == "BCHBTC" || it->first == "BTGBTC" || it->first == "ETHBTC" || it->first == "ADABTC" || it->first == "WANBTC" || it->first == "ZENBTC" || it->first == "AAVEBTC" || it->first == "MKRBTC")
+            if (it->first == "TCTBTC" || it->first == "FTTBTC" || it->first == "UNIBTC" || it->first == "PAXGBTC" || it->first == "LTOBTC" || it->first == "EOSBTC" || it->first == "DCRBTC" || it->first == "XTZBTC" || it->first == "ZECBTC" || it->first == "THETABTC" || it->first == "TRXBTC" || it->first == "BCHBTC" || it->first == "BTGBTC" || it->first == "ETHBTC" || it->first == "WANBTC" || it->first == "ZENBTC" || it->first == "AAVEBTC" || it->first == "MKRBTC" || it->first == "SNTBTC" || it->first == "1INCHBTC" || it->first == "BNBBTC" || it->first == "YFIBTC" || it->first == "IOTABTC" || it->first == "ONTBTC")
                 this->_coins.emplace_back(new Coin(this->_ioctx, pair, stepSize, this->_users));
         }
     }
