@@ -15,6 +15,9 @@ public:
     void update(const binapi::ws::kline_t &kline);
 
 private:
+    void update(binapi::double_type low);
+
+private:
     EMA _EMA;
     std::list<binapi::double_type> _lowList;
     binapi::double_type _lastLowest;

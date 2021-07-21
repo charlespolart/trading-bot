@@ -17,6 +17,7 @@ struct statusEMACross_t
 {
     cross_e cross = cross_e::NONE;
     EMA EMAShort;
+    EMA EMALong;
 };
 
 class EMACross
@@ -27,6 +28,7 @@ public:
 
 public:
     statusEMACross_t getStatus() const;
+    bool crossed() const;
     void update(const binapi::ws::kline_t &kline);
     void init(const std::vector<binapi::rest::klines_t::kline_t> &klines, int EMAShort, int EMALong);
 

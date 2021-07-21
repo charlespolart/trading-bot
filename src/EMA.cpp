@@ -16,9 +16,25 @@ binapi::double_type EMA::getStatus() const
     return (this->_EMA);
 }
 
-void EMA::init(int length)
+bool EMA::isTrending() const
+{
+    std::list<binapi::double_type>::const_reverse_iterator last = this->_buffer.rbegin();
+    std::list<binapi::double_type>::const_reverse_iterator prev = this->_buffer.rbegin();
+
+    prev++;
+    return (*last > *prev);
+}
+
+void EMA::setLength(int length)
 {
     this->_length = length;
+}
+
+void EMA::init(const std::vector<binapi::rest::klines_t::kline_t> &klines, int length)
+{
+    this->_length = length;
+    for (size_t i = 0; i < klines.size(); ++i)
+        this->update(klines[i].close);
 }
 
 void EMA::update(binapi::double_type value)
@@ -27,4 +43,12 @@ void EMA::update(binapi::double_type value)
         this->_EMA = value;
     else
         this->_EMA += (value - this->_EMA) * (2.0 / (this->_length + 1.0));
+    this->_buffer.push_back(this->_EMA);
+    if (this->_buffer.size() > EMA_BUFFER_SIZE)
+        this->_buffer.pop_front();
+}
+
+void EMA::update(const binapi::ws::kline_t &kline)
+{
+    this->update(kline.c);
 }

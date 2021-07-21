@@ -39,8 +39,10 @@ int Server::fetchCoins()
         {
             std::string pair = it->first;
             binapi::double_type stepSize = it->second.get_filter_lot().stepSize;
-            if (it->first == "TCTBTC" || it->first == "FTTBTC" || it->first == "UNIBTC" || it->first == "PAXGBTC" || it->first == "LTOBTC" || it->first == "EOSBTC" || it->first == "DCRBTC" || it->first == "XTZBTC" || it->first == "ZECBTC" || it->first == "THETABTC" || it->first == "TRXBTC" || it->first == "BCHBTC" || it->first == "BTGBTC" || it->first == "ETHBTC" || it->first == "WANBTC" || it->first == "ZENBTC" || it->first == "AAVEBTC" || it->first == "MKRBTC" || it->first == "SNTBTC" || it->first == "1INCHBTC" || it->first == "BNBBTC" || it->first == "YFIBTC" || it->first == "IOTABTC" || it->first == "ONTBTC")
-                this->_coins.emplace_back(new Coin(this->_ioctx, pair, stepSize, this->_users));
+            if (it->first == "ETHBTC" || it->first == "DOGEBTC" || it->first == "ADABTC" || it->first == "MATICBTC" || it->first == "BNBBTC" || it->first == "XRPBTC" || it->first == "AXSBTC" || it->first == "DOTBTC" || it->first == "LINKBTC" || it->first == "THETABTC")
+            //if (it->first == "ETHBTC" || it->first == "ADABTC" || it->first == "BNBBTC" || it->first == "XRPBTC" || it->first == "LTCBTC" || it->first == "EOSBTC" || it->first == "DOGEBTC" || it->first == "AXSBTC" || it->first == "DOTBTC" || it->first == "SNXBTC" || it->first == "MATICBTC" || it->first == "AAVEBTC" || it->first == "WBTCBTC" || it->first == "LINKBTC" || it->first == "LUNABTC" || it->first == "ETCBTC" || it->first == "UNIBTC" || it->first == "MTLBTC" || it->first == "XMRBTC" || it->first == "THETABTC")
+            //if (it->first == "BNBBTC")
+                this->_coins.emplace_back(new Coin(this->_ioctx, this->_api, this->_ws, pair, stepSize, this->_users));
         }
     }
     return (EXIT_SUCCESS);
@@ -55,27 +57,40 @@ void Server::contextRun_thread()
     }
 }
 
-void Server::candle_callback(Coin *coin)
+bool Server::streamToKline(pqxx::stream_from &stream, binapi::ws::kline_t &kline)
 {
-    std::cout << coin->_pair << " - subscribe klines" << std::endl;
-    this->_candleHandlers[coin->_pair] = this->_ws->klines(
-        coin->_pair.c_str(), INTERVAL, [this, coin](const char *fl, int ec, std::string errmsg, binapi::ws::kline_t kline)
-        {
-            if (ec)
-            {
-                std::cerr << coin->_pair << " - subscribe klines error: fl=" << fl << ", ec=" << ec << ", errmsg=" << errmsg << std::endl;
-                this->_ws->unsubscribe(this->_candleHandlers[coin->_pair]);
-                this->candle_callback(coin);
-                return (false);
-            }
-            if (this->_currentKlines.find(coin->_pair) != this->_currentKlines.end() &&
-                kline.t != this->_currentKlines[coin->_pair].t)
-            {
-                coin->updateCallback(this->_currentKlines[coin->_pair]);
-            }
-            this->_currentKlines[coin->_pair] = kline;
-            return (true);
-        });
+    std::tuple<std::string, size_t, size_t, std::string, std::string, std::string, std::string, std::string, std::string, std::string, std::string, int, std::string> row;
+
+    if (!(stream >> row))
+        return (false);
+    std::string interval = std::get<0>(row);
+    size_t openTime = std::get<1>(row);
+    size_t closeTime = std::get<2>(row);
+    std::string openPrice = std::get<3>(row);
+    std::string closePrice = std::get<4>(row);
+    std::string lowPrice = std::get<5>(row);
+    std::string highPrice = std::get<6>(row);
+    std::string volume = std::get<7>(row);
+    std::string quoteVolume = std::get<8>(row);
+    std::string takerBuyVolume = std::get<9>(row);
+    std::string takerBuyQuoteVolume = std::get<10>(row);
+    int tradeCount = std::get<11>(row);
+    std::string pair = std::get<12>(row);
+
+    kline.t = openTime;
+    kline.T = closeTime;
+    kline.s = pair;
+    kline.i = interval;
+    kline.o = std::stod(openPrice);
+    kline.c = std::stod(closePrice);
+    kline.h = std::stod(highPrice);
+    kline.l = std::stod(lowPrice);
+    kline.v = std::stod(volume);
+    kline.n = tradeCount;
+    kline.q = std::stod(quoteVolume);
+    kline.V = std::stod(takerBuyVolume);
+    kline.Q = std::stod(takerBuyQuoteVolume);
+    return (true);
 }
 
 int Server::runHistory()
@@ -110,41 +125,14 @@ int Server::runHistory()
             {
                 continue;
             }
-            if (this->_coins[i]->init(this->_api, endTime) == EXIT_FAILURE)
+            if (this->_coins[i]->init(endTime) == EXIT_FAILURE)
                 continue;
 
-            pqxx::stream_from stream = pqxx::stream_from::query(transaction, "SELECT interval, open_time, close_time, open_price, close_price, low_price, high_price, volume, quote_volume, taker_buy_volume, taker_buy_quote_volume, trade_count FROM candles WHERE pair='" + this->_coins[i]->_pair + "' AND interval='" + INTERVAL + "' ORDER BY open_time ASC");
-            std::tuple<std::string, size_t, size_t, std::string, std::string, std::string, std::string, std::string, std::string, std::string, std::string, int> row;
-            while (stream >> row)
+            pqxx::stream_from stream = pqxx::stream_from::query(transaction, "SELECT interval, open_time, close_time, open_price, close_price, low_price, high_price, volume, quote_volume, taker_buy_volume, taker_buy_quote_volume, trade_count, pair FROM candles WHERE pair='" + this->_coins[i]->_pair + "' AND (interval='" + DOWN1_INTERVAL + "' OR interval='" + MAIN_INTERVAL + "' OR interval='" + UP1_INTERVAL + "' OR interval='" + UP2_INTERVAL + "') ORDER BY open_time ASC");
+            binapi::ws::kline_t kline;
+            while (this->streamToKline(stream, kline))
             {
-                std::string interval = std::get<0>(row);
-                size_t openTime = std::get<1>(row);
-                size_t closeTime = std::get<2>(row);
-                std::string openPrice = std::get<3>(row);
-                std::string closePrice = std::get<4>(row);
-                std::string lowPrice = std::get<5>(row);
-                std::string highPrice = std::get<6>(row);
-                std::string volume = std::get<7>(row);
-                std::string quoteVolume = std::get<8>(row);
-                std::string takerBuyVolume = std::get<9>(row);
-                std::string takerBuyQuoteVolume = std::get<10>(row);
-                int tradeCount = std::get<11>(row);
-                binapi::ws::kline_t kline;
-
-                kline.t = openTime;
-                kline.T = closeTime;
-                kline.s = this->_coins[i]->_pair;
-                kline.i = interval;
-                kline.o = std::stod(openPrice);
-                kline.c = std::stod(closePrice);
-                kline.h = std::stod(highPrice);
-                kline.l = std::stod(lowPrice);
-                kline.v = std::stod(volume);
-                kline.n = tradeCount;
-                kline.q = std::stod(quoteVolume);
-                kline.V = std::stod(takerBuyVolume);
-                kline.Q = std::stod(takerBuyQuoteVolume);
-                this->_coins[i]->updateCallback(kline);
+                this->_coins[i]->update_callback(kline);
                 //std::cout << this->_coins[i]->_pair << " " << std::get<1>(row) << std::endl;
             }
         }
@@ -163,9 +151,8 @@ int Server::runProduction()
 
     for (size_t i = 0; i < this->_coins.size(); ++i)
     {
-        if (this->_coins[i]->init(this->_api) == EXIT_FAILURE)
+        if (this->_coins[i]->init() == EXIT_FAILURE)
             return (EXIT_FAILURE);
-        this->candle_callback(this->_coins[i]);
     }
     if (contextThread.joinable())
         contextThread.join();
