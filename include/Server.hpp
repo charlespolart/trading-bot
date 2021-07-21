@@ -26,7 +26,8 @@ public:
 private:
     int fetchCoins();
     void contextRun_thread();
-    void candle_callback(Coin *coin);
+    void candle_callback(Coin *coin, const std::string &interval);
+    bool streamToKline(pqxx::stream_from &stream, binapi::ws::kline_t &kline);
     int runHistory();
     int runProduction();
 
@@ -36,8 +37,6 @@ private:
     boost::asio::io_context _ioctx;
     std::vector<User *> _users;
     std::vector<Coin *> _coins;
-    std::map<std::string, binapi::ws::kline_t> _currentKlines;
-    std::map<std::string, binapi::ws::websockets_pool::handle> _candleHandlers;
 };
 
 #endif // SERVER_HPP

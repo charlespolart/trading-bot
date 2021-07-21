@@ -20,6 +20,7 @@ enum signal_e
 
 struct status_t
 {
+    bool crossed = false;
     bool bought = false;
     binapi::double_type currentStopLoss = 0.0;
 };
@@ -28,22 +29,23 @@ class Coin
 {
 public:
     Coin() = delete;
-    Coin(boost::asio::io_context &ioctx, const std::string &pair, binapi::double_type stepSize, const std::vector<User *> &users);
+    Coin(boost::asio::io_context &ioctx, binapi::rest::api *api, binapi::ws::websockets_pool *ws, const std::string &pair, binapi::double_type stepSize, const std::vector<User *> &users);
     ~Coin();
 
 public:
     binapi::rest::new_order_info_full_t getBuyOrderInfo() const;
 
 public:
-    void updateCallback(const binapi::ws::kline_t &kline);
-    int init(binapi::rest::api *api, size_t endTime = 0);
+    void update_callback(const binapi::ws::kline_t &kline);
+    int init(size_t endTime = 0);
 
 private:
     signal_e fetchSignal();
+    void trade(const binapi::ws::kline_t &kline);
     void buy(const binapi::ws::kline_t &kline);
     void sell(const binapi::ws::kline_t &kline);
     void setStopLoss(binapi::double_type value);
-    void checkStopLossStatus(const binapi::ws::kline_t &kline);
+    //void updateStopLoss();
     void writeTransaction(const std::string &type, const binapi::ws::kline_t &kline);
 
 public:
@@ -51,8 +53,10 @@ public:
 
 private:
     boost::asio::io_context &_ioctx;
+    binapi::rest::api *_api;
+    binapi::ws::websockets_pool *_ws;
     binapi::double_type _stepSize;
-    Indicators _indicators;
+    std::map<std::string, Indicators> _indicators;
     const std::vector<User *> &_users;
     status_t _status;
 };

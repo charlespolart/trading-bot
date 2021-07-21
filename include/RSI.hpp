@@ -21,13 +21,13 @@ public:
 
 private:
     void updateEMAs(binapi::double_type currentPrice, binapi::double_type previousPrice);
-    void update(binapi::double_type currentPrice);
+    void update(binapi::double_type close);
 
 private:
     binapi::double_type _RSI;
-    EMA _EMAUp;
-    EMA _EMADown;
-    binapi::double_type _lastPrice;
+    EMA _EMAGain;
+    EMA _EMALoss;
+    binapi::double_type _lastClose;
 };
 
 #endif // RSI_HPP

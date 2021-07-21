@@ -1,6 +1,7 @@
 #include "RSI.hpp"
 
-RSI::RSI() : _lastPrice(0.0)
+RSI::RSI() : _RSI(0.0),
+             _lastClose(0.0)
 {
 }
 
@@ -10,22 +11,19 @@ RSI::~RSI()
 
 /* PRIVATE */
 
-void RSI::updateEMAs(binapi::double_type currentPrice, binapi::double_type previousPrice)
+void RSI::update(binapi::double_type close)
 {
-    binapi::double_type change = currentPrice - previousPrice;
-
-    this->_EMAUp.update(change > 0.0 ? change : 0.0);
-    this->_EMADown.update(change < 0.0 ? change * -1.0 : 0.0);
-}
-
-void RSI::update(binapi::double_type currentPrice)
-{
+    binapi::double_type change = close - _lastClose;
+    binapi::double_type gain = change >= 0.0 ? change : 0.0;
+    binapi::double_type loss = change < 0.0 ? -1.0 * change : 0.0;
     binapi::double_type RS = 0.0;
 
-    this->updateEMAs(currentPrice, this->_lastPrice);
-    if (this->_EMADown.getStatus() > 0.0)
-        RS = this->_EMAUp.getStatus() / this->_EMADown.getStatus();
-    this->_RSI = 100.0 - 100.0 / (1.0 + RS);
+    this->_EMAGain.update(gain);
+    this->_EMALoss.update(loss);
+    if (this->_EMALoss.getStatus() > 0.0)
+        RS = this->_EMAGain.getStatus() / this->_EMALoss.getStatus();
+    this->_RSI = 100.0 - (100.0 / (1.0 + RS));
+    _lastClose = close;
 }
 
 /* PUBLIC */
@@ -38,18 +36,12 @@ binapi::double_type RSI::getStatus() const
 void RSI::update(const binapi::ws::kline_t &kline)
 {
     this->update(kline.c);
-    this->_lastPrice = kline.c;
 }
 
 void RSI::init(const std::vector<binapi::rest::klines_t::kline_t> &klines, int length)
 {
-    this->_EMAUp.init(length);
-    this->_EMADown.init(length);
+    this->_EMAGain.setLength(length * 2 - 1);
+    this->_EMALoss.setLength(length * 2 - 1);
     for (size_t i = 0; i < klines.size(); ++i)
-    {
-        if (i > 0)
-            this->updateEMAs(klines[i].close, klines[i - 1].close);
-    }
-    if (!klines.empty())
-        this->_lastPrice = klines.back().close;
+        this->update(klines[i].close);
 }

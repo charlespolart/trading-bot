@@ -38,7 +38,13 @@ statusEMACross_t EMACross::getStatus() const
 
     status.cross = this->_cross;
     status.EMAShort = this->_EMAShort;
+    status.EMALong = this->_EMALong;
     return (status);
+}
+
+bool EMACross::crossed() const
+{
+    return (this->_EMAShort.getStatus() > this->_EMALong.getStatus());
 }
 
 void EMACross::update(const binapi::ws::kline_t &kline)
@@ -49,11 +55,6 @@ void EMACross::update(const binapi::ws::kline_t &kline)
 
 void EMACross::init(const std::vector<binapi::rest::klines_t::kline_t> &klines, int EMAShort, int EMALong)
 {
-    this->_EMAShort.init(EMAShort);
-    this->_EMALong.init(EMALong);
-    for (size_t i = 0; i < klines.size(); ++i)
-    {
-        this->_EMAShort.update(klines[i].close);
-        this->_EMALong.update(klines[i].close);
-    }
+    this->_EMAShort.init(klines, EMAShort);
+    this->_EMALong.init(klines, EMALong);
 }
