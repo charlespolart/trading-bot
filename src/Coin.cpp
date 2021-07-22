@@ -57,8 +57,8 @@ signal_e Coin::fetchSignal()
     bool up3Crossed = this->_indicators[UP3_INTERVAL].getEMACross().crossed();
 
     if (statusEMACross.cross == cross_e::CROSS_UP &&
-        RSIDown1 >= RSI_MIN_BUY && RSIMain >= RSI_MIN_BUY && RSIUp1 >= RSI_MIN_BUY && RSIUp2 >= RSI_MIN_BUY &&
-        down1Crossed && !up1Crossed && !up2Crossed)
+        RSIDown1 >= RSI_MIN_BUY && RSIMain >= RSI_MIN_BUY && RSIUp1 >= RSI_MIN_BUY && RSIUp2 >= RSI_MIN_BUY && RSIUp3 >= RSI_MIN_BUY &&
+        down1Crossed && !up1Crossed && !up2Crossed && !up3Crossed)
     {
         this->_status.crossed = true;
     }

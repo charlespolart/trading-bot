@@ -95,7 +95,7 @@ bool Server::streamToKline(pqxx::stream_from &stream, binapi::ws::kline_t &kline
 
 int Server::runHistory()
 {
-    Database database(std::getenv("DATABASE_HISTORY_TMP_NAME"));
+    Database database(std::getenv("DATABASE_HISTORY_NAME"));
 
     if (!database.getConnection().is_open())
         return (EXIT_FAILURE);
@@ -128,7 +128,7 @@ int Server::runHistory()
             if (this->_coins[i]->init(endTime) == EXIT_FAILURE)
                 continue;
 
-            pqxx::stream_from stream = pqxx::stream_from::query(transaction, "SELECT interval, open_time, close_time, open_price, close_price, low_price, high_price, volume, quote_volume, taker_buy_volume, taker_buy_quote_volume, trade_count, pair FROM candles WHERE pair='" + this->_coins[i]->_pair + "' AND (interval='" + DOWN1_INTERVAL + "' OR interval='" + MAIN_INTERVAL + "' OR interval='" + UP1_INTERVAL + "' OR interval='" + UP2_INTERVAL + "') ORDER BY open_time ASC");
+            pqxx::stream_from stream = pqxx::stream_from::query(transaction, "SELECT interval, open_time, close_time, open_price, close_price, low_price, high_price, volume, quote_volume, taker_buy_volume, taker_buy_quote_volume, trade_count, pair FROM candles WHERE pair='" + this->_coins[i]->_pair + "' AND (interval='" + DOWN1_INTERVAL + "' OR interval='" + MAIN_INTERVAL + "' OR interval='" + UP1_INTERVAL + "' OR interval='" + UP2_INTERVAL + "' OR interval='" + UP3_INTERVAL + "') ORDER BY open_time ASC");
             binapi::ws::kline_t kline;
             while (this->streamToKline(stream, kline))
             {

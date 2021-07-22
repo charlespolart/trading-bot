@@ -1,7 +1,7 @@
 #ifndef PARAMS_H
 #define PARAMS_H
 
-#define HISTORY true
+#define HISTORY false
 #define HISTORY_START 1617448194000
 #define HISTORY_END 1617448194000
 
@@ -9,7 +9,7 @@
 #define MAIN_INTERVAL "1h"
 #define UP1_INTERVAL "2h"
 #define UP2_INTERVAL "4h"
-#define UP3_INTERVAL "8h"
+#define UP3_INTERVAL "6h"
 
 /* EMA CROSS BUY */
 #define EMA_SHORT_BUY 50
