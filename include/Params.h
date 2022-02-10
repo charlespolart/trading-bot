@@ -1,6 +1,10 @@
 #ifndef PARAMS_H
 #define PARAMS_H
 
+#define DEFAULT_PERSON_FILE_PATH "/etc/trading_bot/person.json"
+#define DEFAULT_PAIR_FILE_PATH "/etc/trading_bot/pair.json"
+#define DEFAULT_LOG_FOLDER_PATH "/etc/trading_bot/log"
+
 #define HISTORY false
 #define HISTORY_START 1617448194000
 #define HISTORY_END 1617448194000

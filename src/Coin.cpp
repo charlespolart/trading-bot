@@ -38,37 +38,43 @@ void Coin::update_callback(const binapi::ws::kline_t &kline)
 {
     this->_indicators[kline.i].update(kline);
     if (kline.i == MAIN_INTERVAL)
+    {
+        Tools::Log::writeToFile("Debug", this->_pair + " update_callback");
         this->trade(kline);
+    }
 }
 
 /* PRIVATE */
 
-signal_e Coin::fetchSignal()
+bool Coin::validateSignal()
 {
-    statusEMACross_t statusEMACross = this->_indicators[MAIN_INTERVAL].getEMACross().getStatus();
-    binapi::double_type RSIDown1 = this->_indicators[DOWN1_INTERVAL].getRSI().getStatus();
     binapi::double_type RSIMain = this->_indicators[MAIN_INTERVAL].getRSI().getStatus();
+    binapi::double_type RSIDown1 = this->_indicators[DOWN1_INTERVAL].getRSI().getStatus();
     binapi::double_type RSIUp1 = this->_indicators[UP1_INTERVAL].getRSI().getStatus();
     binapi::double_type RSIUp2 = this->_indicators[UP2_INTERVAL].getRSI().getStatus();
     binapi::double_type RSIUp3 = this->_indicators[UP3_INTERVAL].getRSI().getStatus();
-    bool down1Crossed = this->_indicators[DOWN1_INTERVAL].getEMACross().crossed();
-    bool up1Crossed = this->_indicators[UP1_INTERVAL].getEMACross().crossed();
-    bool up2Crossed = this->_indicators[UP2_INTERVAL].getEMACross().crossed();
-    bool up3Crossed = this->_indicators[UP3_INTERVAL].getEMACross().crossed();
+    bool down1Crossed = this->_indicators[DOWN1_INTERVAL].getEMACross().getStatus().lastCross == cross_e::CROSS_UP;
+    bool up1Crossed = this->_indicators[UP1_INTERVAL].getEMACross().getStatus().lastCross == cross_e::CROSS_UP;
+    bool up2Crossed = this->_indicators[UP2_INTERVAL].getEMACross().getStatus().lastCross == cross_e::CROSS_UP;
+    bool up3Crossed = this->_indicators[UP3_INTERVAL].getEMACross().getStatus().lastCross == cross_e::CROSS_UP;
 
-    if (statusEMACross.cross == cross_e::CROSS_UP &&
-        RSIDown1 >= RSI_MIN_BUY && RSIMain >= RSI_MIN_BUY && RSIUp1 >= RSI_MIN_BUY && RSIUp2 >= RSI_MIN_BUY && RSIUp3 >= RSI_MIN_BUY &&
+    if (RSIMain >= RSI_MIN_BUY && RSIDown1 >= RSI_MIN_BUY && RSIUp1 >= RSI_MIN_BUY && RSIUp2 >= RSI_MIN_BUY && RSIUp3 >= RSI_MIN_BUY &&
         down1Crossed && !up1Crossed && !up2Crossed && !up3Crossed)
-    {
-        this->_status.crossed = true;
-    }
-    else if (this->_status.crossed && !this->_status.bought && RSIMain <= 60)
+        return (true);
+    return (false);
+}
+
+signal_e Coin::fetchSignal()
+{
+    cross_e cross = this->_indicators[MAIN_INTERVAL].getEMACross().getStatus().cross;
+    cross_e lastCross = this->_indicators[MAIN_INTERVAL].getEMACross().getStatus().lastCross;
+
+    if (cross == cross_e::CROSS_UP && validateSignal())
     {
         return (signal_e::BUY);
     }
-    else if (/*kline.c <= this->_status.currentStopLoss || */ /*kline.c <= statusEMACross.EMALong.getStatus() || */ this->_status.crossed && statusEMACross.cross == cross_e::CROSS_DOWN)
+    else if (lastCross == cross_e::CROSS_DOWN)
     {
-        this->_status.crossed = false;
         return (signal_e::SELL);
     }
     return (signal_e::NONE);
@@ -92,6 +98,9 @@ void Coin::buy(const binapi::ws::kline_t &kline)
 {
     if (!this->_status.bought)
     {
+        /*std::cout << "Buy" << std::endl;
+        statusEMACross_t statusEMACross = this->_indicators[MAIN_INTERVAL].getEMACross().getStatus();
+        std::cout << "Short: " << Tools::Convert::to_string(statusEMACross.EMAShort.getStatus(), 9) << " | Long: " << Tools::Convert::to_string(statusEMACross.EMALong.getStatus(), 9) << std::endl;*/
         this->_status.bought = true;
         for (size_t i = 0; i < this->_users.size(); ++i)
         {
@@ -107,6 +116,9 @@ void Coin::sell(const binapi::ws::kline_t &kline)
 {
     if (this->_status.bought)
     {
+        /*std::cout << "Sell" << std::endl;
+        statusEMACross_t statusEMACross = this->_indicators[MAIN_INTERVAL].getEMACross().getStatus();
+        std::cout << "Short: " << Tools::Convert::to_string(statusEMACross.EMAShort.getStatus(), 9) << " | Long: " << Tools::Convert::to_string(statusEMACross.EMALong.getStatus(), 9) << std::endl << std::endl;*/
         this->_status = status_t{};
         for (size_t i = 0; i < this->_users.size(); ++i)
         {

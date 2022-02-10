@@ -7,6 +7,7 @@
 #include "EMACross.hpp"
 #include "RSI.hpp"
 #include "SwingLow.hpp"
+#include "Tools.hpp"
 
 typedef std::function<void(const binapi::ws::kline_t &)> Callback;
 

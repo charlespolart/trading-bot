@@ -1,10 +1,7 @@
 #ifndef FETCHUSERS_HPP
 #define FETCHUSERS_HPP
 
-#include <iostream>
-#include <cstdlib>
 #include <fstream>
-#include <vector>
 #include <rapidjson/document.h>
 
 #include "User.hpp"
@@ -28,15 +25,19 @@ public:
 private:
     static int documentParse(rapidjson::Document &document)
     {
-        const char *path = nullptr;
+        const char *path = std::getenv("PERSON_FILE_TRADING_BOT");
         FILE *fd = nullptr;
         size_t size = 0;
         char *file = nullptr;
 
-        if (!(path = std::ifstream("/etc/trading_bot/person.json") ? "/etc/trading_bot/person.json" : std::getenv("PERSON_FILE_TRADING_BOT")))
+        if (!path)
         {
-            std::cerr << "Person file not found" << std::endl;
-            return (EXIT_FAILURE);
+            path = DEFAULT_PERSON_FILE_PATH;
+            if (!std::ifstream(path))
+            {
+                std::cerr << DEFAULT_PERSON_FILE_PATH << " not found" << std::endl;
+                return (EXIT_FAILURE);
+            }
         }
         if (!(fd = std::fopen(path, "r")))
         {

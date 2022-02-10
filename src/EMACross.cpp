@@ -1,6 +1,7 @@
 #include "EMACross.hpp"
 
-EMACross::EMACross() : _cross(cross_e::NONE)
+EMACross::EMACross() : _cross(cross_e::NONE),
+                       _lastCross(cross_e::NONE)
 {
 }
 
@@ -15,9 +16,15 @@ void EMACross::updateCross(binapi::double_type prevShortaverage, binapi::double_
     if (prevShortaverage == prevLongAverage)
         return;
     if ((prevShortaverage < prevLongAverage) && (this->_EMAShort.getStatus() > this->_EMALong.getStatus()))
+    {
         this->_cross = cross_e::CROSS_UP;
+        this->_lastCross = cross_e::CROSS_UP;
+    }
     else if ((prevShortaverage > prevLongAverage) && (this->_EMAShort.getStatus() < this->_EMALong.getStatus()))
+    {
         this->_cross = cross_e::CROSS_DOWN;
+        this->_lastCross = cross_e::CROSS_DOWN;
+    }
 }
 
 void EMACross::addNewCandle(const binapi::ws::kline_t &kline)
@@ -36,15 +43,11 @@ statusEMACross_t EMACross::getStatus() const
 {
     statusEMACross_t status;
 
-    status.cross = this->_cross;
     status.EMAShort = this->_EMAShort;
     status.EMALong = this->_EMALong;
+    status.cross = this->_cross;
+    status.lastCross = this->_lastCross;
     return (status);
-}
-
-bool EMACross::crossed() const
-{
-    return (this->_EMAShort.getStatus() > this->_EMALong.getStatus());
 }
 
 void EMACross::update(const binapi::ws::kline_t &kline)

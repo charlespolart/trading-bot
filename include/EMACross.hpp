@@ -15,9 +15,10 @@ enum class cross_e
 
 struct statusEMACross_t
 {
-    cross_e cross = cross_e::NONE;
     EMA EMAShort;
     EMA EMALong;
+    cross_e cross = cross_e::NONE;
+    cross_e lastCross = cross_e::NONE;
 };
 
 class EMACross
@@ -28,7 +29,6 @@ public:
 
 public:
     statusEMACross_t getStatus() const;
-    bool crossed() const;
     void update(const binapi::ws::kline_t &kline);
     void init(const std::vector<binapi::rest::klines_t::kline_t> &klines, int EMAShort, int EMALong);
 
@@ -41,6 +41,7 @@ private:
     EMA _EMAShort;
     EMA _EMALong;
     cross_e _cross;
+    cross_e _lastCross;
 };
 
 #endif // EMACROSS_HPP

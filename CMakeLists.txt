@@ -11,6 +11,7 @@ set(TRADING_BOT_HEADERS
     ${CMAKE_CURRENT_SOURCE_DIR}/include/Database.hpp
     ${CMAKE_CURRENT_SOURCE_DIR}/include/EMA.hpp
     ${CMAKE_CURRENT_SOURCE_DIR}/include/EMACross.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/FetchPairs.hpp
     ${CMAKE_CURRENT_SOURCE_DIR}/include/FetchUsers.hpp
     ${CMAKE_CURRENT_SOURCE_DIR}/include/Indicators.hpp
     ${CMAKE_CURRENT_SOURCE_DIR}/include/RSI.hpp

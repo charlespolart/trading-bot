@@ -49,6 +49,9 @@ binapi::rest::new_order_info_full_t User::buy(const std::string &pair)
         this->_mutex.lock();
         this->_boughtList[pair] = bought;
         this->_mutex.unlock();
+        std::stringstream ss;
+        ss << bought;
+        Tools::Log::writeToFile("Buy", ss.str());
         std::cout << "Buy: " << bought << std::endl;
     }
     return (bought);
@@ -88,6 +91,9 @@ void User::sell(const std::string &pair, binapi::double_type stepSize)
     else
     {
         binapi::rest::new_order_info_full_t sold = res.v.get_response_full();
+        std::stringstream ss;
+        ss << sold;
+        Tools::Log::writeToFile("Sell", ss.str());
         std::cout << "Sell: " << sold << std::endl;
     }
 }

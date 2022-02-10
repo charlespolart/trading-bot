@@ -68,7 +68,7 @@ int Indicators::init(Callback update_callback, size_t endTime)
     this->_EMACross.init(klines.v.klines, EMA_SHORT_BUY, EMA_LONG_BUY);
     this->_EMA200.init(klines.v.klines, 200);
     this->_RSI.init(klines.v.klines, RSI_LENGTH);
-    //this->_swingLow.init(klines.v.klines, EMA_SWING_LOW);
+    // this->_swingLow.init(klines.v.klines, EMA_SWING_LOW);
 
     if (!HISTORY)
         this->candleSubscriber(update_callback);
@@ -82,7 +82,7 @@ void Indicators::update(const binapi::ws::kline_t &kline)
     this->_EMACross.update(kline);
     this->_EMA200.update(kline);
     this->_RSI.update(kline);
-    //this->_swingLow.update(kline);
+    // this->_swingLow.update(kline);
 }
 
 /* PRIVATE */
@@ -91,6 +91,7 @@ void Indicators::candleSubscriber(Callback update_callback)
 {
     std::cout << this->_pair << " - subscribe klines "
               << "(" << this->_interval << ")" << std::endl;
+    Tools::Log::writeToFile("Debug", this->_pair + " - subscribe klines (" + this->_interval + ")");
     this->_candleHandler = this->_ws->klines(
         this->_pair.c_str(), this->_interval.c_str(), [this, update_callback](const char *fl, int ec, std::string errmsg, binapi::ws::kline_t kline)
         {
@@ -99,6 +100,8 @@ void Indicators::candleSubscriber(Callback update_callback)
                 std::cerr << this->_pair << " - subscribe klines "
                           << "(" << this->_interval << ")"
                           << " error: fl=" << fl << ", ec=" << ec << ", errmsg=" << errmsg << std::endl;
+                Tools::Log::writeToFile("Debug", this->_pair + " - subscribe klines (" + this->_interval + ")"
+                          + " error: fl=" + fl + ", ec=" + std::to_string(ec) + ", errmsg=" + errmsg);
                 this->_ws->unsubscribe(this->_candleHandler);
                 this->candleSubscriber(update_callback);
                 return (false);
@@ -108,6 +111,6 @@ void Indicators::candleSubscriber(Callback update_callback)
                 update_callback(this->_currentKline);
             }
             this->_currentKline = kline;
-            return (true);
-        });
+            Tools::Log::writeToFile("candleSubsciber", this->_pair + " " + this->_interval + " received kline");
+            return (true); });
 }

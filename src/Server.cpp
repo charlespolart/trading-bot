@@ -26,6 +26,12 @@ Server::~Server()
 int Server::fetchCoins()
 {
     std::cout << "Fetching coins..." << std::endl;
+
+    std::vector<std::string> pairs;
+
+    if (FetchPairs::fetch(pairs) == EXIT_FAILURE)
+        return (EXIT_FAILURE);
+
     auto exchange_info = this->_api->exchange_info();
 
     if (!exchange_info)
@@ -39,9 +45,9 @@ int Server::fetchCoins()
         {
             std::string pair = it->first;
             binapi::double_type stepSize = it->second.get_filter_lot().stepSize;
-            if (it->first == "ETHBTC" || it->first == "DOGEBTC" || it->first == "ADABTC" || it->first == "MATICBTC" || it->first == "BNBBTC" || it->first == "XRPBTC" || it->first == "AXSBTC" || it->first == "DOTBTC" || it->first == "LINKBTC" || it->first == "THETABTC")
-            //if (it->first == "ETHBTC" || it->first == "ADABTC" || it->first == "BNBBTC" || it->first == "XRPBTC" || it->first == "LTCBTC" || it->first == "EOSBTC" || it->first == "DOGEBTC" || it->first == "AXSBTC" || it->first == "DOTBTC" || it->first == "SNXBTC" || it->first == "MATICBTC" || it->first == "AAVEBTC" || it->first == "WBTCBTC" || it->first == "LINKBTC" || it->first == "LUNABTC" || it->first == "ETCBTC" || it->first == "UNIBTC" || it->first == "MTLBTC" || it->first == "XMRBTC" || it->first == "THETABTC")
-            //if (it->first == "BNBBTC")
+            // if (it->first == "ETHBTC" || it->first == "DOGEBTC" || it->first == "ADABTC" || it->first == "MATICBTC" || it->first == "BNBBTC" || it->first == "XRPBTC" || it->first == "AXSBTC" || it->first == "DOTBTC" || it->first == "LINKBTC" || it->first == "THETABTC")
+            // if (it->first == "MATICBTC")
+            if (std::find(pairs.begin(), pairs.end(), it->first) != pairs.end())
                 this->_coins.emplace_back(new Coin(this->_ioctx, this->_api, this->_ws, pair, stepSize, this->_users));
         }
     }
@@ -54,6 +60,8 @@ void Server::contextRun_thread()
     {
         this->_ioctx.run();
         this->_ioctx.restart();
+        std::cout << "ioctx restart" << std::endl;
+        Tools::Log::writeToFile("ioctx", "ioctx restart");
     }
 }
 
@@ -133,7 +141,7 @@ int Server::runHistory()
             while (this->streamToKline(stream, kline))
             {
                 this->_coins[i]->update_callback(kline);
-                //std::cout << this->_coins[i]->_pair << " " << std::get<1>(row) << std::endl;
+                // std::cout << this->_coins[i]->_pair << " " << std::get<1>(row) << std::endl;
             }
         }
         database.getConnection().close();
@@ -147,15 +155,18 @@ int Server::runHistory()
 
 int Server::runProduction()
 {
-    std::thread contextThread = std::thread(&Server::contextRun_thread, this);
+    std::thread contextThread;
 
     for (size_t i = 0; i < this->_coins.size(); ++i)
     {
         if (this->_coins[i]->init() == EXIT_FAILURE)
             return (EXIT_FAILURE);
+        if (!contextThread.joinable())
+            contextThread = std::thread(&Server::contextRun_thread, this);
     }
     if (contextThread.joinable())
         contextThread.join();
+    std::cout << "Thread ended" << std::endl;
     return (EXIT_SUCCESS);
 }
 
@@ -163,7 +174,7 @@ int Server::runProduction()
 
 int Server::run()
 {
-    if (!HISTORY && FetchUsers::fetch(this->_ioctx, this->_users))
+    if (!HISTORY && FetchUsers::fetch(this->_ioctx, this->_users) == EXIT_FAILURE)
         return (EXIT_FAILURE);
     if (this->fetchCoins() == EXIT_FAILURE)
         return (EXIT_FAILURE);

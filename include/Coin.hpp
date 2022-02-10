@@ -20,7 +20,6 @@ enum signal_e
 
 struct status_t
 {
-    bool crossed = false;
     bool bought = false;
     binapi::double_type currentStopLoss = 0.0;
 };
@@ -40,6 +39,7 @@ public:
     int init(size_t endTime = 0);
 
 private:
+    bool validateSignal();
     signal_e fetchSignal();
     void trade(const binapi::ws::kline_t &kline);
     void buy(const binapi::ws::kline_t &kline);

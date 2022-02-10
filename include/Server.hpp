@@ -11,6 +11,7 @@
 #include "Params.h"
 #include "Coin.hpp"
 #include "Database.hpp"
+#include "FetchPairs.hpp"
 #include "FetchUsers.hpp"
 #include "User.hpp"
 
